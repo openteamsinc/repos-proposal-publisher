@@ -32,3 +32,5 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          API_URL: ${{ secrets.API_URL }}
