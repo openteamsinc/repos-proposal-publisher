@@ -1,0 +1,13 @@
+{
+    "$schema": "https://json.schemastore.org/package",
+    "name": "repos-proposals",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@actions/core": "^1.6.0",
+        "@actions/exec": "^1.1.0"
+    }
+}
