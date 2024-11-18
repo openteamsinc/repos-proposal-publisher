@@ -1,0 +1,16 @@
+name: 'REPOS Proposal Publisher'
+description: 'A GitHub Action to publish proposals to REPOS website'
+author: 'Openteams Inc'
+
+inputs:
+  token:
+    description: 'GitHub Token generated from GitHub Account'
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'index.js'
+
+branding:
+  icon: 'file'
+  color: 'blue' 
