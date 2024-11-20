@@ -2,9 +2,6 @@ name: Test REPOS Proposal Publisher
 
 on: [push]
 
-permissions:
-  contents: read
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,6 +11,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run REPOS Proposal Publisher
-        uses: openteamsinc/repos-proposal-publisher@fix-npm
+        uses: openteamsinc/repos-proposal-publisher@fix-API_URL
         with:
           token: ${{ secrets.GH_TOKEN }}
