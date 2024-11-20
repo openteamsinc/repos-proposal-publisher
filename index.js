@@ -6,6 +6,7 @@ async function run() {
     // Get inputs
     const token = core.getInput('token');
     const apiUrl = process.env.API_URL;  // Access API_URL from environment
+    console.log(`API_URL: ${apiUrl}`);
 
     if (!apiUrl) {
       throw new Error("API_URL environment variable is not set");
