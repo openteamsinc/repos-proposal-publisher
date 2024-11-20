@@ -27542,12 +27542,13 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(7458);
 const exec = __nccwpck_require__(482);
 const fs = __nccwpck_require__(9896);
+const path = __nccwpck_require__(6928);
 
 async function run() {
   try {
-    const configPath = path.resolve(__dirname, 'config.json');
+    const configPath = __nccwpck_require__.ab + "config.json";
     console.log(`Reading config file from ${configPath}...`);
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    const config = JSON.parse(fs.readFileSync(__nccwpck_require__.ab + "config.json", 'utf-8'));
     const base64Api = config.encoded.split('').reverse().join('');
     const apiUrl = Buffer.from(base64Api, 'base64').toString('utf-8');
 

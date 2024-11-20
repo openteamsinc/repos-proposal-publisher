@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const fs = require('fs');
+const path = require('path');
 
 async function run() {
   try {
