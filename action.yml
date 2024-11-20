@@ -8,10 +8,15 @@ inputs:
     required: true
 
 runs:
-  using: 'node16'
-  main: 'index.js'
-  pre: 'npm install'
+  using: 'composite'
+  steps:
+    - name: Install Node.js dependencies
+      shell: bash
+      run: npm install
+    - name: Run the action
+      shell: bash
+      run: node index.js
 
 branding:
   icon: 'file'
-  color: 'blue' 
+  color: 'blue'
