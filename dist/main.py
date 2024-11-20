@@ -274,6 +274,9 @@ def main():
     project_stages = {}
     extra_information = None
 
+    repo_url, default_branch = get_repository_details()
+    latest_commit_id = get_latest_commit_id(default_branch)
+
     # Read the proposal file
     proposal_files = read_proposal_folder()
     for proposal_path in proposal_files:
@@ -312,6 +315,9 @@ def main():
             print("Project Details & Specifications:", details)
             print("Project Stages:", project_stages)
             print("Supporting Information:", extra_information)
+            print("GitHub Repository URL:", repo_url)
+            print("GitHub Default Branch:", default_branch)
+            print("Latest Commit ID:", latest_commit_id)
 
             validate_proposal(
                 title,
@@ -330,23 +336,20 @@ def main():
                 title, tagline, description, details, project_stages, extra_information
             )
 
-            print("=====================================================")
+            print("=========================================================")
             print("Validations & Moderations Checks Results:")
-            print("=====================================================")
+            print("=========================================================")
             print("{:<85} | {}".format("Check", "Result"))
-            print("-----------------------------------------------------")
+            print("---------------------------------------------------------")
 
             for key, value in checklist.items():
                 result = "Passed" if value else "Failed"
                 print("{:<85} | {}".format(key, result))
 
-            print("=====================================================")
+            print("=========================================================")
 
             if all(checklist.values()):
                 print("All checks passed. Submitting proposal to the API.")
-
-                repo_url, default_branch = get_repository_details()
-                latest_commit_id = get_latest_commit_id(default_branch)
 
                 response = requests.post(
                     f"{API_URL}submit_proposal/",
@@ -377,9 +380,11 @@ def main():
                     print(response.message)
 
             else:
-                print("Some checks failed. Please correct the proposal file.")
+                raise Exception(
+                    "Some checks failed. Please fix the issues and try again."
+                )
 
-            print("=====================================================")
+            print("=========================================================")
 
 
 if __name__ == "__main__":
