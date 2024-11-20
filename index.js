@@ -25,6 +25,7 @@ async function run() {
     process.env.GH_TOKEN = token;
 
     const requirementsPath = path.resolve(__dirname, 'requirements.txt');
+    const mainPath = path.resolve(__dirname, 'main.py');
     // Install Python dependencies
     console.log("Installing Python dependencies...");
     await exec.exec('pip', ['install', '-r', requirementsPath]);
@@ -32,7 +33,7 @@ async function run() {
 
     // Run the Python script
     console.log("Running the Python script...");
-    await exec.exec('python', ['main.py'], {
+    await exec.exec('python', [mainPath], {
       env: { ...process.env, API_URL: apiUrl, GH_TOKEN: token },
     });
   } catch (error) {

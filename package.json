@@ -12,6 +12,7 @@
   },
   "files": [
     "index.js",
-    "requirements.txt"
+    "requirements.txt",
+    "main.py"
   ]
 }

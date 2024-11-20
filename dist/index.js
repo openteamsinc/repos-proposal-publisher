@@ -27566,6 +27566,7 @@ async function run() {
     process.env.GH_TOKEN = token;
 
     const requirementsPath = __nccwpck_require__.ab + "requirements.txt";
+    const mainPath = __nccwpck_require__.ab + "main.py";
     // Install Python dependencies
     console.log("Installing Python dependencies...");
     await exec.exec('pip', ['install', '-r', __nccwpck_require__.ab + "requirements.txt"]);
@@ -27573,7 +27574,7 @@ async function run() {
 
     // Run the Python script
     console.log("Running the Python script...");
-    await exec.exec('python', ['main.py'], {
+    await exec.exec('python', [__nccwpck_require__.ab + "main.py"], {
       env: { ...process.env, API_URL: apiUrl, GH_TOKEN: token },
     });
   } catch (error) {
