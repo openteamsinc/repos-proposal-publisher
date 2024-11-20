@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const path = require('path');
 
 async function run() {
   try {
@@ -23,13 +24,16 @@ async function run() {
     process.env.API_URL = apiUrl;
     process.env.GH_TOKEN = token;
 
+    const requirementsPath = path.resolve(__dirname, 'requirements.txt');
+    const mainPath = path.resolve(__dirname, 'main.py');
     // Install Python dependencies
     console.log("Installing Python dependencies...");
-    await exec.exec('pip install -r requirements.txt');
+    await exec.exec('pip', ['install', '-r', requirementsPath]);
+    console.log("Python dependencies installed successfully.");
 
     // Run the Python script
     console.log("Running the Python script...");
-    await exec.exec('python', ['main.py'], {
+    await exec.exec('python', [mainPath], {
       env: { ...process.env, API_URL: apiUrl, GH_TOKEN: token },
     });
   } catch (error) {
