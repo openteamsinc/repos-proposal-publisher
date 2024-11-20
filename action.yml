@@ -29,7 +29,7 @@ runs:
       shell: bash
       working-directory: ./action  # Ensure this points to the directory with index.js
       env:
-        API_URL: ${{ vars.api_url }}  # Set the API_URL from the inputs
+        API_URL: ${{ vars.API_URL }}  # Set the API_URL from the inputs
 
 branding:
   icon: 'file'
