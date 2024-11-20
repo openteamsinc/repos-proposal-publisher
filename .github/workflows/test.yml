@@ -2,6 +2,10 @@ name: Test REPOS Proposal Publisher
 
 on: [push]
 
+permissions:            # Explicitly set secrets permissions
+  contents: read
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
