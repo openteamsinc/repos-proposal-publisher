@@ -8,6 +8,12 @@ API_URL = os.getenv("API_URL")
 GH_TOKEN = os.getenv("GH_TOKEN")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
 
+if not API_URL:
+    raise ValueError("API_URL environment variable is not set.")
+
+if not GH_TOKEN:
+    raise ValueError("GH_TOKEN environment variable is not set.")
+
 
 HEADER = {
     "Authorization": f"Bearer {GH_TOKEN}",
