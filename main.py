@@ -5,12 +5,12 @@ import requests
 import yaml
 
 API_URL = os.getenv("API_URL")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GH_TOKEN = os.getenv("GH_TOKEN")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
 
 
 HEADER = {
-    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    "Authorization": f"Bearer {GH_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
 }
 

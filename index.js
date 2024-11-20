@@ -12,7 +12,7 @@ async function run() {
     }
 
     // Set GITHUB_TOKEN for access
-    process.env.GITHUB_TOKEN = token;
+    process.env.GH_TOKEN = token;
 
     // Install dependencies and run the Python script with environment variables
     await exec('pip install -r requirements.txt');
