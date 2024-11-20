@@ -8,19 +8,8 @@ inputs:
     required: true
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Install Node.js dependencies
-      shell: bash
-      run: |
-        npm ci
-
-    - name: Run Node.js Action
-      shell: bash
-      run: node index.js
-      env:
-        API_URL: ${{ secrets.API_URL }}
-        GITHUB_TOKEN: ${{ inputs.token }}
+  using: 'node20'
+  main: 'dist/index.js'
 
 branding:
   icon: 'file'
