@@ -3,18 +3,23 @@ const exec = require('@actions/exec');
 
 async function run() {
   try {
-    // Fetch secrets and inputs
-    const apiUrl = process.env.API_URL;  // API_URL is set in the origin repository secrets
-    const token = core.getInput('token'); // GitHub token passed by the user
+    // Debug: Log available environment variables
+    console.log("Available environment variables:", process.env);
+
+    // Access the API_URL secret
+    const apiUrl = process.env.API_URL; // Secret from origin repository
+    const token = core.getInput('token'); // GitHub token from the calling workflow
 
     if (!apiUrl) {
-      throw new Error("API_URL is not set in the origin repository's secrets.");
+      throw new Error(
+        "API_URL is not set in the origin repository's secrets."
+      );
     }
 
     console.log(`Using API_URL: ${apiUrl}`);
 
     // Set environment variables for the Python script
-    process.env.GITHUB_TOKEN = token;
+    process.env.GH_TOKEN = token;
 
     // Install Python dependencies
     console.log("Installing Python dependencies...");

@@ -13,4 +13,4 @@ jobs:
       - name: Run REPOS Proposal Publisher
         uses: openteamsinc/repos-proposal-publisher@fix-npm
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
