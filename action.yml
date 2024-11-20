@@ -28,6 +28,8 @@ runs:
       run: node index.js
       shell: bash
       working-directory: ./action  # Ensure this points to the directory with index.js
+      env:
+        API_URL: ${{ secrets.API_URL }}  # Pass the API_URL from the secrets
 
 branding:
   icon: 'file'
