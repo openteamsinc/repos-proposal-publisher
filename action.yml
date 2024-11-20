@@ -20,7 +20,11 @@ runs:
         path: ./action
 
     - name: Install Node.js dependencies
-      run: npm install
+      run: |
+        # Install dependencies
+        npm install
+        # Inject environment variables for Node.js
+        export API_URL="${{ secrets.API_URL }}"
       shell: bash
       working-directory: ./action  # Ensure this points to the directory with package.json
 
@@ -28,8 +32,6 @@ runs:
       run: node index.js
       shell: bash
       working-directory: ./action  # Ensure this points to the directory with index.js
-      env:
-        API_URL: ${{ vars.API_URL }}  # Set the API_URL from the inputs
 
 branding:
   icon: 'file'
