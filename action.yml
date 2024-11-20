@@ -8,8 +8,20 @@ inputs:
     required: true
 
 runs:
-  using: 'node12'
-  main: './action/index.js'
+  using: 'composite'
+  steps:
+    - name: Set up Node.js environment
+      shell: bash
+      run: |
+        # Install Node.js dependencies
+        npm install
+
+    - name: Run the action
+      shell: node
+      run: node index.js
+      env:
+        API_URL: ${{ secrets.API_URL }}
+        GH_TOKEN: ${{ inputs.token }}
 
 branding:
   icon: 'file'
