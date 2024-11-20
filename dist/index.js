@@ -27541,6 +27541,7 @@ module.exports = parseParams
 var __webpack_exports__ = {};
 const core = __nccwpck_require__(7458);
 const exec = __nccwpck_require__(482);
+const path = __nccwpck_require__(6928);
 
 async function run() {
   try {
@@ -27564,9 +27565,11 @@ async function run() {
     process.env.API_URL = apiUrl;
     process.env.GH_TOKEN = token;
 
+    const requirementsPath = __nccwpck_require__.ab + "requirements.txt";
     // Install Python dependencies
     console.log("Installing Python dependencies...");
-    await exec.exec('pip install -r requirements.txt');
+    await exec.exec('pip', ['install', '-r', __nccwpck_require__.ab + "requirements.txt"]);
+    console.log("Python dependencies installed successfully.");
 
     // Run the Python script
     console.log("Running the Python script...");
