@@ -13,15 +13,21 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Checkout action repository
+      uses: actions/checkout@v2
+      with:
+        repository: openteamsinc/repos-proposal-publisher
+        path: ./action
+
     - name: Install Node.js dependencies
-      shell: bash
       run: npm install
-      working-directory: ./  # Ensure this points to the directory with package.json
+      shell: bash
+      working-directory: ./action  # Ensure this points to the directory with package.json
 
     - name: Run the action
-      shell: bash
       run: node index.js
-      working-directory: ./  # Ensure this points to the directory with index.js
+      shell: bash
+      working-directory: ./action  # Ensure this points to the directory with index.js
 
 branding:
   icon: 'file'
