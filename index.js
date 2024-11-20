@@ -23,7 +23,7 @@ async function run() {
     // Run the Python script
     console.log("Running the Python script...");
     await exec.exec('python', ['main.py'], {
-      env: { ...process.env, API_URL: apiUrl, GITHUB_TOKEN: token },
+      env: { ...process.env, API_URL: apiUrl, GH_TOKEN: token },
     });
   } catch (error) {
     core.setFailed(error.message);
