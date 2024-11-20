@@ -6,6 +6,10 @@ inputs:
   token:
     description: 'GitHub Token generated from GitHub Account'
     required: true
+  api_url:
+    description: 'API URL for the REPOS website'
+    required: true
+    default: ${{ secrets.API_URL }}
 
 runs:
   using: 'composite'
@@ -28,6 +32,8 @@ runs:
       run: node index.js
       shell: bash
       working-directory: ./action  # Ensure this points to the directory with index.js
+      env:
+        API_URL: ${{ inputs.api_url }}  # Set the API_URL from the inputs
 
 branding:
   icon: 'file'
