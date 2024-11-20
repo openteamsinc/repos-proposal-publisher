@@ -13,4 +13,4 @@ jobs:
       - name: Run REPOS Proposal Publisher
         uses: openteamsinc/repos-proposal-publisher@repo-name
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: "test"
