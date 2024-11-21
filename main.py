@@ -197,11 +197,20 @@ def validate_proposal(
         checklist["Phase 1 moderation passed."] = False
         checklist["Phase 2 moderation passed."] = False
 
-    if len(project_stages["Phase 1"].split(" ")) < 20:
-        checklist["Phase 1 must be more than 20 words."] = False
+    else:
+        if len(project_stages["Phase 1"].split(" ")) < 20:
+            checklist["Phase 1 must be more than 20 words."] = False
 
-    if len(project_stages["Phase 2"].split(" ")) < 20:
-        checklist["Phase 2 must be more than 20 words."] = False
+        if len(project_stages["Phase 2"].split(" ")) < 20:
+            checklist["Phase 2 must be more than 20 words."] = False
+
+    # Validate additional phases if present
+    for phase, phase_description in project_stages.items():
+        if phase not in ["Phase 1", "Phase 2"]:
+            if len(phase_description.split(" ")) < 20:
+                checklist[f"{phase} must be more than 20 words."] = False
+            else:
+                checklist[f"{phase} must be more than 20 words."] = True
 
     if not extra_information:
         del checklist["Supporting information moderation passed."]
@@ -217,7 +226,7 @@ def moderate_text(
     tagline: str,
     description: str,
     details: str,
-    project_stages: str,
+    project_stages: dict,
     extra_information: str,
 ) -> None:
     if not moderation_api_request(title):
@@ -231,6 +240,8 @@ def moderate_text(
     for phase_key, phase_content in project_stages.items():
         if not moderation_api_request(phase_content):
             checklist[f"{phase_key} moderation passed."] = False
+        else:
+            checklist[f"{phase_key} moderation passed."] = True
     if not moderation_api_request(extra_information):
         checklist["Supporting information moderation passed."] = False
 
@@ -263,7 +274,7 @@ def main():
             metadata = parse_yaml_metadata(content)
             sections = fetch_sections(content)
 
-            print("====== Received Contents ======")
+            print("================== Received Contents ==================")
 
             title = metadata.get("Proposal Title", None)
             tagline = metadata.get("Tagline", None)
@@ -313,17 +324,17 @@ def main():
                 title, tagline, description, details, project_stages, extra_information
             )
 
-            print("=========================================================")
+            print("=" * 100)
             print("Validations & Moderations Checks Results:")
-            print("=========================================================")
+            print("=" * 100)
             print("{:<85} | {}".format("Check", "Result"))
-            print("---------------------------------------------------------")
+            print("-" * 100)
 
             for key, value in checklist.items():
                 result = "Passed" if value else "Failed"
                 print("{:<85} | {}".format(key, result))
 
-            print("=========================================================")
+            print("=" * 100)
 
             if all(checklist.values()):
                 print("All checks passed. Submitting proposal to the API.")
@@ -361,7 +372,7 @@ def main():
                     "Some checks failed. Please fix the issues and try again."
                 )
 
-            print("=========================================================")
+            print("=" * 100)
 
 
 if __name__ == "__main__":
