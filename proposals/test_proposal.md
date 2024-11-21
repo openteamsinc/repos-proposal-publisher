@@ -61,6 +61,10 @@ The project will proceed with the review and moderation of the proposal by the O
 
 The project will conclude with the publication of the proposal on the OpenTeams platform. The proposal will be made available to the community for viewing and engagement. The proposal will be open for comments, feedback, and collaboration from the community members. The proposal will serve as a demonstration of the process of creating a proposal on the OpenTeams platform.
 
+### Phase 4
+
+The project will conclude with the publication of the proposal on the OpenTeams platform. The proposal will be made available to the community for viewing and engagement. The proposal will be open for comments, feedback, and collaboration from the community members. The proposal will serve as a demonstration of the process of creating a proposal on the OpenTeams platform.
+
 
 ## Supporting Information
 <!-- Provide any additional supporting information -->
