@@ -7,19 +7,14 @@ import yaml
 API_URL = os.getenv("API_URL")
 GH_TOKEN = os.getenv("GH_TOKEN")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
+GITHUB_REF = os.getenv("GITHUB_REF")
+GITHUB_SHA = os.getenv("GITHUB_SHA")
 
 if not API_URL:
     raise ValueError("API_URL environment variable is not set.")
 
 if not GH_TOKEN:
     raise ValueError("GH_TOKEN environment variable is not set.")
-
-
-HEADER = {
-    "Authorization": f"Bearer {GH_TOKEN}",
-    "Accept": "application/vnd.github.v3+json",
-}
-
 
 checklist = {
     "Title is required.": True,
@@ -46,26 +41,6 @@ checklist = {
     "Phase 2 moderation passed.": True,
     "Supporting information moderation passed.": True,
 }
-
-
-def get_repository_details() -> tuple[str, str]:
-    api_url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}"
-    response = requests.get(api_url, headers=HEADER)
-    if response.status_code == 200:
-        repo_data = response.json()
-        return repo_data["html_url"], repo_data["default_branch"]
-    else:
-        raise Exception(f"Failed to fetch repository details: {response.status_code}")
-
-
-def get_latest_commit_id(branch: str) -> str:
-    api_url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/commits/{branch}"
-    response = requests.get(api_url, headers=HEADER)
-    if response.status_code == 200:
-        commit_data = response.json()
-        return commit_data["sha"]
-    else:
-        raise Exception(f"Failed to fetch commit details: {response.status_code}")
 
 
 def read_proposal_folder() -> list[str]:
@@ -273,9 +248,11 @@ def main():
     details = None
     project_stages = {}
     extra_information = None
-
-    repo_url, default_branch = get_repository_details()
-    latest_commit_id = get_latest_commit_id(default_branch)
+    github_repository_url = (
+        f"https://github.com/{GITHUB_REPOSITORY}" if GITHUB_REPOSITORY else None
+    )
+    github_default_branch = GITHUB_REF.split("/")[-1] if GITHUB_REF else None
+    latest_commit_id = GITHUB_SHA if GITHUB_SHA else None
 
     # Read the proposal file
     proposal_files = read_proposal_folder()
@@ -315,8 +292,8 @@ def main():
             print("Project Details & Specifications:", details)
             print("Project Stages:", project_stages)
             print("Supporting Information:", extra_information)
-            print("GitHub Repository URL:", repo_url)
-            print("GitHub Default Branch:", default_branch)
+            print("GitHub Repository URL:", github_repository_url)
+            print("GitHub Default Branch:", github_default_branch)
             print("Latest Commit ID:", latest_commit_id)
 
             validate_proposal(
@@ -371,7 +348,7 @@ def main():
                         "details": details,
                         "project_stages": project_stages,
                         "extra_information": extra_information,
-                        "github_url": repo_url,
+                        "github_url": github_repository_url,
                         "commit_id": latest_commit_id,
                     },
                 )

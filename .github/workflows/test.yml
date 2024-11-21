@@ -11,6 +11,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run REPOS Proposal Publisher
-        uses: openteamsinc/repos-proposal-publisher@repo-name
+        uses: openteamsinc/repos-proposal-publisher@test
         with:
           token: "test"
