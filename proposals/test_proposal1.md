@@ -1,5 +1,5 @@
 ---
-Proposal Title: "Demo Proposal"
+Proposal Title: "Demo Proposal 1"
 Tagline: "Demo Tagline for Proposal"
 Requested Funding Amount: "10000"
 Skills: "Python, Machine Learning, Data Analysis"

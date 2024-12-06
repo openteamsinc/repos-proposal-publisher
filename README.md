@@ -1,11 +1,26 @@
-# repos-proposal
+# repos-proposal-publisher
 
-This repsoitory is for creation an action for publishing a proposal to on REPOS website.
+This repository is for creation an action for publishing a proposal to REPOS website.
 
 ## Usage
 
-
 For publishing a proposal to REPOS website, you need to create a proposal markdown file in `proposals` folder with the following structure:
+
+**Things to note:**
+- Proposal Title: Cannot be empty, must be less than 20 words, unique, and meet Moderation Standards.
+- Tagline: Must be less than 160 characters and meet Moderation Standards.
+- Requested Funding Amount: Only required if you are looking for sponsor.
+- Skills: Only required if you are looking for team members.
+- Author: Must be a valid GitHub username, and should have an account on REPOS website.
+- Whether the organization is willing to sponsor the project: Yes or No.
+- Whether this is an existing OSS project: Yes or No.
+- Project Description: Cannot be empty, must meet Moderation Standards, and must be of minimum 50 words.
+- Project Details & Specifications: Cannot be empty, must meet Moderation Standards, and must be of minimum 50 words.
+- Project Stages: Cannot be empty. Phase 1 and Phase 2 are required. Each phase must meet Moderation Standards and must be of minimum 20 words. You can add more phases if needed.
+- Supporting Information: Can be empty, must meet Moderation Standards.
+
+
+Here is an example of a proposal markdown file:
 
 ```yaml
 ---
@@ -13,7 +28,7 @@ Proposal Title: "Demo Proposal"
 Tagline: "Demo Tagline for Proposal"
 Requested Funding Amount: "10000"
 Skills: "Python, Machine Learning, Data Analysis"
-Author: "@openteamsinc"
+Author: "@openteams-psm-assistant"
 Is your organization willing to sponsor this project?: "No"
 Is this an existing OSS project?: "Yes"
 ---
@@ -79,7 +94,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet n
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet nisl tincidunt tincidunt
 ```
 
-After creating the proposal markdown file, you need to add GitHub token to the repository secrets with the name `GITHUB_TOKEN`.
+After creating the proposal markdown file, you need to add GitHub token to the repository secrets with the name `GH_TOKEN`.
 
 Then, you can create a workflow file in `.github/workflows` folder with the following content:
 
@@ -100,9 +115,7 @@ jobs:
             uses: actions/checkout@v2
     
         - name: Run REPOS Proposal Publisher
-            uses: openteamsinc/repos-proposal@v1
+            uses: openteamsinc/repos-proposal-publisher@dev
             with:
-                token: ${{ secrets.GITHUB_TOKEN }}
-            env:
-                API_URL: ${{ secrets.API_URL }}
+                token: ${{ secrets.GH_TOKEN }}
 ```bash
