@@ -1,5 +1,6 @@
 import os
 import re
+from uuid import uuid4
 
 import requests
 import yaml
@@ -41,6 +42,31 @@ checklist = {
     "Phase 2 moderation passed.": True,
     "Supporting information moderation passed.": True,
 }
+
+proposal_list = dict()
+github_repository_url = (
+    f"https://github.com/{GITHUB_REPOSITORY}" if GITHUB_REPOSITORY else None
+)
+github_default_branch = GITHUB_REF.split("/")[-1] if GITHUB_REF else None
+latest_commit_id = GITHUB_SHA if GITHUB_SHA else None
+bypass_process = GITHUB_REPOSITORY != "openteamsinc/repos-proposal-publisher"
+
+
+def check_title(title: str) -> bool:
+    response = requests.get(f"{API_URL}check_title?title={title}")
+    return response.status_code == 200
+
+
+def check_username(username: str) -> bool:
+    response = requests.get(f"{API_URL}check_username?username={username.lstrip('@')}")
+    return response.status_code == 200
+
+
+def check_proposal_on_repos(pid: uuid4) -> dict:
+    response = requests.get(f"{API_URL}check_proposal?pid={pid}")
+    if response.status_code == 200:
+        return response.json()["proposal"][0]
+    return None
 
 
 def read_proposal_folder() -> list[str]:
@@ -109,6 +135,8 @@ def fetch_sections(content: str) -> dict:
 
 
 def validate_proposal(
+    old_proposal_data: dict,
+    pid: uuid4,
     title: str,
     tagline: str,
     requested_funding_amount: str,
@@ -121,26 +149,33 @@ def validate_proposal(
     extra_information: str,
 ):
 
-    if not title:
+    print("Performing validations on the proposal.....")
+
+    print("Validating Title.....")
+    if title:
+        print("Title is present.")
+        if pid and old_proposal_data and old_proposal_data["title"] == title:
+            checklist["Title must be unique."] = True
+        else:
+            checklist["Title must be unique."] = check_title(title)
+            if len(title.split(" ")) > 20:
+                checklist["Title must be less than 20 words."] = False
+    else:
+        print("Title is not present.")
         checklist["Title is required."] = False
         checklist["Title must be unique."] = False
         checklist["Title must be less than 20 words."] = False
         checklist["Title moderation passed."] = False
 
-    if title:
-        response = requests.get(f"{API_URL}check_title?title={title}")
-        if response.status_code != 200:
-            checklist["Title must be unique."] = False
-
-    if len(title.split(" ")) > 20:
-        checklist["Title must be less than 20 words."] = False
-
-    if not tagline:
+    if tagline:
+        print("Validating Tagline.....")
+        print("Tagline is present.")
+        if len(tagline) > 160:
+            checklist["Tagline must be less than 160 characters."] = False
+    else:
+        print("Tagline is not present.")
         del checklist["Tagline must be less than 160 characters."]
         del checklist["Tagline moderation passed."]
-
-    if len(tagline) > 160:
-        checklist["Tagline must be less than 160 characters."] = False
 
     if requested_funding_amount and not requested_funding_amount.isdigit():
         checklist["Requested funding amount must be an integer."] = False
@@ -155,15 +190,12 @@ def validate_proposal(
             "Is it an existing OSS project is required. Kindly provide a response in Yes or No."
         ] = False
 
-    if not author:
-        checklist["Author is required."] = False
-
+    print("Validating Author.....")
     if author:
-        response = requests.get(
-            f"{API_URL}check_username?username={author.lstrip('@')}"
-        )
-        if response.status_code != 200:
-            checklist["Author must be a user on REPOS."] = False
+        checklist["Author must be a user on REPOS."] = check_username(author)
+    else:
+        checklist["Author is required."] = False
+        checklist["Author must be a user on REPOS."] = False
 
     if not description:
         checklist[
@@ -197,11 +229,20 @@ def validate_proposal(
         checklist["Phase 1 moderation passed."] = False
         checklist["Phase 2 moderation passed."] = False
 
-    if len(project_stages["Phase 1"].split(" ")) < 20:
-        checklist["Phase 1 must be more than 20 words."] = False
+    else:
+        if len(project_stages["Phase 1"].split(" ")) < 20:
+            checklist["Phase 1 must be more than 20 words."] = False
 
-    if len(project_stages["Phase 2"].split(" ")) < 20:
-        checklist["Phase 2 must be more than 20 words."] = False
+        if len(project_stages["Phase 2"].split(" ")) < 20:
+            checklist["Phase 2 must be more than 20 words."] = False
+
+    # Validate additional phases if present
+    for phase, phase_description in project_stages.items():
+        if phase not in ["Phase 1", "Phase 2"]:
+            if len(phase_description.split(" ")) < 20:
+                checklist[f"{phase} must be more than 20 words."] = False
+            else:
+                checklist[f"{phase} must be more than 20 words."] = True
 
     if not extra_information:
         del checklist["Supporting information moderation passed."]
@@ -213,15 +254,20 @@ def moderation_api_request(text: str) -> bool:
 
 
 def moderate_text(
+    old_proposal_data: dict,
+    pid: uuid4,
     title: str,
     tagline: str,
     description: str,
     details: str,
-    project_stages: str,
+    project_stages: dict,
     extra_information: str,
 ) -> None:
-    if not moderation_api_request(title):
-        checklist["Title moderation passed."] = False
+    if pid and old_proposal_data and old_proposal_data["title"] != title:
+        checklist["Title moderation passed."] = moderation_api_request(title)
+    else:
+        if not moderation_api_request(title):
+            checklist["Title moderation passed."] = False
     if not moderation_api_request(tagline):
         checklist["Tagline moderation passed."] = False
     if not moderation_api_request(description):
@@ -231,40 +277,47 @@ def moderate_text(
     for phase_key, phase_content in project_stages.items():
         if not moderation_api_request(phase_content):
             checklist[f"{phase_key} moderation passed."] = False
+        else:
+            checklist[f"{phase_key} moderation passed."] = True
     if not moderation_api_request(extra_information):
         checklist["Supporting information moderation passed."] = False
 
 
 def main():
-
-    title = None
-    tagline = None
-    requested_funding_amount = None
-    skills = None
-    organization_willing_to_sponsor = None
-    existing_oss_project = None
-    author = None
-    description = None
-    details = None
-    project_stages = {}
-    extra_information = None
-    github_repository_url = (
-        f"https://github.com/{GITHUB_REPOSITORY}" if GITHUB_REPOSITORY else None
-    )
-    github_default_branch = GITHUB_REF.split("/")[-1] if GITHUB_REF else None
-    latest_commit_id = GITHUB_SHA if GITHUB_SHA else None
-
     # Read the proposal file
+    print("=" * 100)
+    print("Reading proposals from the folder.....")
     proposal_files = read_proposal_folder()
+    print("Found proposals in the folder: ")
+    print("\n".join(proposal_files))
+
     for proposal_path in proposal_files:
-        print("Reading proposal file:", proposal_path)
+
+        pid = None
+        title = None
+        tagline = None
+        requested_funding_amount = None
+        skills = None
+        organization_willing_to_sponsor = None
+        existing_oss_project = None
+        author = None
+        description = None
+        details = None
+        project_stages = {}
+        extra_information = None
+        old_proposal_data = None
+
+        print("Reading proposal file: ", proposal_path.split("/")[-1])
+
         with open(proposal_path, "r") as file:
+
             content = file.read()
             metadata = parse_yaml_metadata(content)
             sections = fetch_sections(content)
 
-            print("====== Received Contents ======")
+            print("================== Received Contents ==================")
 
+            pid = metadata.get("Proposal ID", None)
             title = metadata.get("Proposal Title", None)
             tagline = metadata.get("Tagline", None)
             requested_funding_amount = metadata.get("Requested Funding Amount", None)
@@ -296,7 +349,13 @@ def main():
             print("GitHub Default Branch:", github_default_branch)
             print("Latest Commit ID:", latest_commit_id)
 
+            if pid:
+                print("Proposal ID: ", pid)
+                old_proposal_data = check_proposal_on_repos(pid)
+
             validate_proposal(
+                old_proposal_data,
+                pid,
                 title,
                 tagline,
                 requested_funding_amount,
@@ -310,58 +369,82 @@ def main():
             )
 
             moderate_text(
-                title, tagline, description, details, project_stages, extra_information
+                old_proposal_data,
+                pid,
+                title,
+                tagline,
+                description,
+                details,
+                project_stages,
+                extra_information,
             )
 
-            print("=========================================================")
+            print("=" * 100)
             print("Validations & Moderations Checks Results:")
-            print("=========================================================")
+            print("=" * 100)
             print("{:<85} | {}".format("Check", "Result"))
-            print("---------------------------------------------------------")
+            print("-" * 100)
 
             for key, value in checklist.items():
                 result = "Passed" if value else "Failed"
                 print("{:<85} | {}".format(key, result))
 
-            print("=========================================================")
+            print("=" * 100)
 
-            if all(checklist.values()):
-                print("All checks passed. Submitting proposal to the API.")
+            payload = {
+                "title": title,
+                "tagline": tagline,
+                "funds_requested": requested_funding_amount,
+                "skills": skills,
+                "organization_willing_to_sponsor": (
+                    True if str(organization_willing_to_sponsor) == "Yes" else False
+                ),
+                "existing_oss_project": (
+                    True if str(existing_oss_project) == "Yes" else False
+                ),
+                "author": str(author).split("@")[-1],
+                "description": description,
+                "details": details,
+                "project_stages": project_stages,
+                "extra_information": extra_information,
+                "github_url": github_repository_url,
+                "commit_id": latest_commit_id,
+            }
 
-                response = requests.post(
-                    f"{API_URL}submit_proposal/",
-                    data={
-                        "title": title,
-                        "tagline": tagline,
-                        "funds_requested": requested_funding_amount,
-                        "skills": skills,
-                        "organization_willing_to_sponsor": (
-                            True
-                            if str(organization_willing_to_sponsor) == "Yes"
-                            else False
-                        ),
-                        "existing_oss_project": (
-                            True if str(existing_oss_project) == "Yes" else False
-                        ),
-                        "author": author,
-                        "description": description,
-                        "details": details,
-                        "project_stages": project_stages,
-                        "extra_information": extra_information,
-                        "github_url": github_repository_url,
-                        "commit_id": latest_commit_id,
-                    },
-                )
+            proposal_list[proposal_path.split("/")[-1]] = {
+                "payload": payload,
+                "checklist": checklist,
+                "path": proposal_path,
+            }
 
-                if response.status_code == 200:
-                    print(response.message)
+    for filename, proposal_data in proposal_list.items():
+        if not all(proposal_data["checklist"].values()):
+            print(f"Skipping proposal for {filename} due to failed checks.")
+            continue
 
-            else:
-                raise Exception(
-                    "Some checks failed. Please fix the issues and try again."
-                )
+        print(f"Submitting proposal for {filename}")
+        if bypass_process:
+            response = requests.post(
+                f"{API_URL}submit_proposal/",
+                data=proposal_data["payload"],
+            )
+            if response.status_code == 200:
+                print(response.json()["message"])
 
-            print("=========================================================")
+                if "proposal_id" in response.json():
+                    with open(proposal_data["path"], "r+") as file:
+                        lines = file.readlines()
+                        proposal_id_line = (
+                            f'Proposal ID: "{response.json()["proposal_id"]}"\n'
+                        )
+                        lines.insert(1, proposal_id_line)
+                        file.seek(0)
+                        file.writelines(lines)
+        else:
+            print(f"Failed to submit proposal for {filename}")
+
+    print("=" * 100)
+    print("Completed processing proposals.")
 
 
 if __name__ == "__main__":
