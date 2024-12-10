@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "ncc build index.js -o dist && cp requirements.txt dist/ && cp main.py dist/"
   },
   "dependencies": {
     "@actions/core": "^1.6.0",
