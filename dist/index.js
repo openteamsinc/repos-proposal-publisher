@@ -42730,7 +42730,7 @@ async function main() {
 
     console.log("=".repeat(100));
 
-    const payload = {
+    let payload = {
       title,
       tagline,
       funds_requested: requestedFundingAmount,
@@ -42745,6 +42745,10 @@ async function main() {
       github_url: githubRepositoryUrl,
       commit_id: latestCommitId,
     };
+
+    if (pid) {
+      payload["proposal_id"] = pid;
+    }
 
     proposalList[path.basename(proposalPath)] = {
       payload,
