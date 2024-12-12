@@ -42720,12 +42720,12 @@ async function main() {
     console.log("=".repeat(100));
     console.log("Validations & Moderations Checks Results:");
     console.log("=".repeat(100));
-    console.log("{:<85} | {}".format("Check", "Result"));
+    console.log(`${"Check".padEnd(85)} | Result`);
     console.log("-".repeat(100));
 
     for (const [key, value] of Object.entries(checklist)) {
       const result = value ? "Passed" : "Failed";
-      console.log("{:<85} | {}".format(key, result));
+      console.log(`${key.padEnd(85)} | ${result}`);
     }
 
     console.log("=".repeat(100));
