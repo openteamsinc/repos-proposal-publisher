@@ -42769,7 +42769,7 @@ async function main() {
       if (response.status === 200) {
         console.log(response.data.message);
 
-        if (response.data.proposal_id) {
+        if (!proposalData.payload.proposal_id && response.data.proposal_id) {
           const content = fs.readFileSync(proposalData.path, 'utf8');
           const lines = content.split('\n');
           const proposalIdLine = `Proposal ID: "${response.data.proposal_id}"`;
