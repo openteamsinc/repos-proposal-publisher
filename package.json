@@ -5,15 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "ncc build index.js -o dist && cp requirements.txt dist/ && cp main.py dist/"
+    "build": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
-    "@actions/exec": "^1.1.0"
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@octokit/rest": "^21.0.2"
   },
   "files": [
-    "index.js",
-    "requirements.txt",
-    "main.py"
+    "index.js"
   ]
 }
