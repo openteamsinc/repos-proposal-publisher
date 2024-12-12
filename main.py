@@ -391,8 +391,6 @@ def main():
 
             print("=" * 100)
             
-            print("project_stages: ", project_stages)
-
             payload = {
                 "title": title,
                 "tagline": tagline,
@@ -428,7 +426,7 @@ def main():
         if bypass_process:
             response = requests.post(
                 f"{API_URL}submit_proposal/",
-                data=proposal_data["payload"],
+                json=proposal_data["payload"],
             )
             if response.status_code == 200:
                 print(response.json()["message"])
