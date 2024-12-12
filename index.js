@@ -412,18 +412,19 @@ async function main() {
           const octokit = new Octokit({ auth: GH_TOKEN });
           const [owner, repo] = GITHUB_REPOSITORY.split('/');
           const branch = GITHUB_REF.split('/').pop();
+          const relativePath = path.relative(process.env.GITHUB_WORKSPACE, proposalData.path);
 
           const { data: { sha } } = await octokit.repos.getContent({
             owner,
             repo,
-            path: proposalData.path,
+            path: relativePath,
             ref: branch,
           });
 
           await octokit.repos.createOrUpdateFileContents({
             owner,
             repo,
-            path: proposalData.path,
+            path: relativePath,
             message: 'Update proposal with proposal ID',
             content: Buffer.from(lines.join('\n')).toString('base64'),
             sha,
