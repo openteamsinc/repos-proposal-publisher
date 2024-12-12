@@ -11,6 +11,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run REPOS Proposal Publisher
-        uses: openteamsinc/repos-proposal-publisher@dev
+        uses: openteamsinc/repos-proposal-publisher@fix-project-stages
         with:
           token: ${{ secrets.GH_TOKEN }}
