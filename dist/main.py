@@ -390,6 +390,8 @@ def main():
                 print("{:<85} | {}".format(key, result))
 
             print("=" * 100)
+            
+            print("project_stages: ", project_stages)
 
             payload = {
                 "title": title,
@@ -405,7 +407,7 @@ def main():
                 "author": str(author).split("@")[-1],
                 "description": description,
                 "details": details,
-                "project_stages": dict(project_stages),
+                "project_stages": project_stages,
                 "extra_information": extra_information,
                 "github_url": github_repository_url,
                 "commit_id": latest_commit_id,
