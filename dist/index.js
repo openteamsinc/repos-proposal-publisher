@@ -42768,7 +42768,7 @@ async function main() {
         if (response.data.proposal_id) {
           const content = fs.readFileSync(proposalData.path, 'utf8');
           const lines = content.split('\n');
-          const proposalIdLine = `Proposal ID: "${response.data.proposal_id}"\n`;
+          const proposalIdLine = `Proposal ID: "${response.data.proposal_id}"`;
           lines.splice(1, 0, proposalIdLine);
           fs.writeFileSync(proposalData.path, lines.join('\n'), 'utf8');
 
