@@ -390,7 +390,7 @@ def main():
                 print("{:<85} | {}".format(key, result))
 
             print("=" * 100)
-            
+
             payload = {
                 "title": title,
                 "tagline": tagline,
