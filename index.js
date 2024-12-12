@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const yaml = require('js-yaml');
+const { Octokit } = require('@octokit/rest');
 
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 const GITHUB_REF = process.env.GITHUB_REF;
@@ -78,7 +79,7 @@ async function checkProposalOnRepos(pid) {
 }
 
 function readProposalFolder() {
-  const proposalPath = path.join(process.cwd(), 'proposals');
+  const proposalPath = path.join(process.env.GITHUB_WORKSPACE, 'proposals');
   const allFiles = [];
   if (fs.existsSync(proposalPath) && fs.lstatSync(proposalPath).isDirectory()) {
     const files = fs.readdirSync(proposalPath);
