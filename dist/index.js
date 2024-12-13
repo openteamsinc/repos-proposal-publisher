@@ -42386,11 +42386,6 @@ if (!API_URI) {
     "API not found."
   );
 }
-else {
-  console.log("Received API URL");
-}
-
-
 
 var checklist = {
   "Title is required.": true,
@@ -42443,7 +42438,7 @@ async function checkProposalOnRepos(pid) {
 }
 
 function readProposalFolder() {
-  const proposalPath = path.join(process.env.GITHUB_WORKSPACE, 'proposals');
+  const proposalPath = path.join(process.env.GITHUB_WORKSPACE || __dirname, 'proposals');
   const allFiles = [];
   if (fs.existsSync(proposalPath) && fs.lstatSync(proposalPath).isDirectory()) {
     const files = fs.readdirSync(proposalPath);
@@ -42470,17 +42465,17 @@ function parseYamlMetadata(content) {
 function fetchSections(content) {
   content = content.replace(/<!--.*?-->/gs, '');
 
-  const projectDescriptionPattern = /## Project Description\n(.*?)\n## Project Details & Specifications/s;
-  const projectDetailsPattern = /## Project Details & Specifications\n(.*?)\n## Project Stages/s;
-  const projectStagesPattern = /## Project Stages\n(.*?)\n## Supporting Information/s;
-  const supportingInfoPattern = /## Supporting Information\n(.*?)$/s;
+  const projectDescriptionPattern = /## Project Description\s*([\s\S]*?)\s*## Project Details & Specifications/;
+  const projectDetailsPattern = /## Project Details & Specifications\s*([\s\S]*?)\s*## Project Stages/;
+  const projectStagesPattern = /## Project Stages\s*([\s\S]*?)\s*## Supporting Information/;
+  const supportingInfoPattern = /## Supporting Information\s*([\s\S]*?)$/;
 
   const projectDescription = content.match(projectDescriptionPattern);
   const projectDetails = content.match(projectDetailsPattern);
   const projectStages = content.match(projectStagesPattern);
   const supportingInfo = content.match(supportingInfoPattern);
 
-  const phasesPattern = /### (Phase \d+)\n(.*?)\n(?=### Phase \d+|$)/gs;
+  const phasesPattern = /### (Phase \d+)\s*([\s\S]*?)\s*(?=### Phase \d+|$)/g;
   const phasesMatches = projectStages ? [...projectStages[1].matchAll(phasesPattern)] : [];
   const phases = Object.fromEntries(phasesMatches.map(match => [match[1], match[2].trim()]));
 
@@ -42602,35 +42597,90 @@ async function moderationApiRequest(text) {
   return response.status === 200;
 }
 
-async function moderateText(oldProposalData, pid, title, tagline, description, details, projectStages, extraInformation) {
+async function moderateText(oldProposalData, moderationMetadata, pid, title, tagline, description, details, projectStages, extraInformation) {
   if (pid && oldProposalData && oldProposalData.title !== title) {
     checklist["Title moderation passed."] = await moderationApiRequest(title);
+    moderationMetadata["title"] = {
+      "passed": checklist["Title moderation passed."],
+    }
   } else {
     if (!await moderationApiRequest(title)) {
       checklist["Title moderation passed."] = false;
+      moderationMetadata["title"] = {
+        "passed": checklist["Title moderation passed."],
+      }
     }
   }
+
   if (!await moderationApiRequest(tagline)) {
     checklist["Tagline moderation passed."] = false;
+    moderationMetadata["tagline"] = {
+      "passed": checklist["Tagline moderation passed."],
+    }
   }
+  else {
+    checklist["Tagline moderation passed."] = true;
+    moderationMetadata["tagline"] = {
+      "passed": checklist["Tagline moderation passed."],
+    }
+  }
+
   if (!await moderationApiRequest(description)) {
     checklist["Project description moderation passed."] = false;
+    moderationMetadata["description"] = {
+      "passed": checklist["Project description moderation passed."],
+    }
   }
+  else {
+    checklist["Project description moderation passed."] = true;
+    moderationMetadata["description"] = {
+      "passed": checklist["Project description moderation passed."],
+    }
+  }
+
+
   if (!await moderationApiRequest(details)) {
     checklist["Project details & specification moderation passed."] = false;
+    moderationMetadata["details"] = {
+      "passed": checklist["Project details & specification moderation passed."],
+    }
   }
+  else {
+    checklist["Project details & specification moderation passed."] = true;
+    moderationMetadata["details"] = {
+      "passed": checklist["Project details & specification moderation passed."],
+    }
+  }
+
+  moderationMetadata["project_stages"] = {};
   for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
     if (!await moderationApiRequest(phaseContent)) {
       checklist[`${phaseKey} moderation passed.`] = false;
+      moderationMetadata["project_stages"][phaseKey] = {
+        "passed": checklist[`${phaseKey} moderation passed.`],
+      }
+
     } else {
       checklist[`${phaseKey} moderation passed.`] = true;
+      moderationMetadata["project_stages"][phaseKey] = {
+        "passed": checklist[`${phaseKey} moderation passed.`],
+      }
+    }
+
+    if (!await moderationApiRequest(extraInformation)) {
+      checklist["Supporting information moderation passed."] = false;
+      moderationMetadata["extra_information"] = {
+        "passed": checklist["Supporting information moderation passed."],
+      }
+    }
+    else {
+      checklist["Supporting information moderation passed."] = true;
+      moderationMetadata["extra_information"] = {
+        "passed": checklist["Supporting information moderation passed."],
+      }
     }
   }
-  if (!await moderationApiRequest(extraInformation)) {
-    checklist["Supporting information moderation passed."] = false;
-  }
 }
-
 
 async function main() {
   console.log("=".repeat(100));
@@ -42652,6 +42702,7 @@ async function main() {
     let details = null;
     let projectStages = {};
     let extraInformation = null;
+    let moderationMetadata = {};
     let oldProposalData = null;
 
     console.log("Reading proposal file: ", path.basename(proposalPath));
@@ -42693,6 +42744,7 @@ async function main() {
     if (pid) {
       console.log("Proposal ID: ", pid);
       oldProposalData = await checkProposalOnRepos(pid);
+      moderationMetadata = oldProposalData?.moderation_metadata || {};
     }
 
     await validateProposal(
@@ -42712,6 +42764,7 @@ async function main() {
 
     await moderateText(
       oldProposalData,
+      moderationMetadata,
       pid,
       title,
       tagline,
@@ -42754,6 +42807,25 @@ async function main() {
       payload["proposal_id"] = pid;
     }
 
+    const allChecksPassed = Object.values(checklist).every(Boolean);
+    const anyModerationFailed = Object.entries(checklist).some(([key, value]) => key.includes('moderation') && !value);
+
+    if (allChecksPassed) {
+      payload["status"] = "Published";
+      moderationMetadata["retry"] = 0;
+    } else if (anyModerationFailed && moderationMetadata.retry === 2) {
+      payload["status"] = "Under Review";
+    } else {
+      payload["status"] = "Draft";
+      if (anyModerationFailed) {
+        moderationMetadata["retry"] = moderationMetadata["retry"] ? moderationMetadata["retry"] + 1 : 1;
+      }
+    }
+
+    if (moderationMetadata) {
+      payload["moderation_metadata"] = moderationMetadata;
+    }
+
     proposalList[path.basename(proposalPath)] = {
       payload,
       checklist,
@@ -42763,8 +42835,7 @@ async function main() {
 
   for (const [filename, proposalData] of Object.entries(proposalList)) {
     if (!Object.values(proposalData.checklist).every(Boolean)) {
-      console.log(`Skipping proposal for ${filename} due to failed checks.`);
-      continue;
+      console.log(`Proposal for ${filename} has some to failed checks. So it is currently set as ${payload["status"]} status on REPOS. Kindly fix the issues.`);
     }
 
     console.log(`Submitting proposal for ${filename}`);
@@ -42819,7 +42890,6 @@ async function main() {
 main().catch(error => {
   core.setFailed(error.message);
 });
-
 
 module.exports = __webpack_exports__;
 /******/ })()
