@@ -442,8 +442,6 @@ async function main() {
           console.log(`Proposal file ${filename} updated and committed successfully.`);
         }
       }
-    } else {
-      console.log(`Failed to submit proposal for ${filename}`);
     }
   }
 
