@@ -42496,22 +42496,24 @@ async function validateProposal(oldProposalData, pid, title, tagline, requestedF
   console.log("Performing validations on the proposal.....");
 
   console.log("Validating Title.....");
-  if (title) {
-    console.log("Title is present.");
-    if (pid && oldProposalData && oldProposalData.title === title) {
-      checklist["Title must be unique."] = true;
-    } else {
-      checklist["Title must be unique."] = await checkTitle(title);
-      if (title.split(' ').length > 20) {
-        checklist["Title must be less than 20 words."] = false;
+  if (bypassProcess) {
+    if (title) {
+      console.log("Title is present.");
+      if (pid && oldProposalData && oldProposalData.title === title) {
+        checklist["Title must be unique."] = true;
+      } else {
+        checklist["Title must be unique."] = await checkTitle(title);
+        if (title.split(' ').length > 20) {
+          checklist["Title must be less than 20 words."] = false;
+        }
       }
+    } else {
+      console.log("Title is not present.");
+      checklist["Title is required."] = false;
+      checklist["Title must be unique."] = false;
+      checklist["Title must be less than 20 words."] = false;
+      checklist["Title moderation passed."] = false;
     }
-  } else {
-    console.log("Title is not present.");
-    checklist["Title is required."] = false;
-    checklist["Title must be unique."] = false;
-    checklist["Title must be less than 20 words."] = false;
-    checklist["Title moderation passed."] = false;
   }
 
   if (tagline) {
@@ -42539,11 +42541,13 @@ async function validateProposal(oldProposalData, pid, title, tagline, requestedF
   }
 
   console.log("Validating Author.....");
-  if (author) {
-    checklist["Author must be a user on REPOS."] = await checkUsername(author);
-  } else {
-    checklist["Author is required."] = false;
-    checklist["Author must be a user on REPOS."] = false;
+  if (bypassProcess) {
+    if (author) {
+      checklist["Author must be a user on REPOS."] = await checkUsername(author);
+    } else {
+      checklist["Author is required."] = false;
+      checklist["Author must be a user on REPOS."] = false;
+    }
   }
 
   if (!description) {
