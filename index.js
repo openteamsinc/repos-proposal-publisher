@@ -321,107 +321,142 @@ async function moderationApiRequest(text) {
   return response.status === 200;
 }
 
+async function checkModeration(text, checklistKey, metadataKey, phaseKey = null) {
+  const response = await moderationApiRequest(text);
+  if (response.status === 406) checklist[checklistKey] = false;
+  else checklist[checklistKey] = true;
+
+  if (phaseKey) {
+    moderationMetadata["project_stages"][phaseKey] = {
+      "passed": checklist[checklistKey],
+    };
+  }
+  else {
+    moderationMetadata[metadataKey] = {
+      "passed": checklist[checklistKey],
+    };
+  }
+}
+
 async function moderateText(
   oldProposalData, moderationMetadata, pid, title,
   tagline, description, details, projectStages, extraInformation
 ) {
   console.log("Performing moderation checks on the proposal.....");
 
-  console.log("Moderating Title.....");
-  if (pid && oldProposalData && oldProposalData.title !== title) {
-    console.log("Title is different from the previous one. So checking it's moderation.");
-    checklist[titleModerationPassed] = await moderationApiRequest(title);
-    moderationMetadata["title"] = {
-      "passed": checklist[titleModerationPassed],
-    }
-  } else {
-    if (!await moderationApiRequest(title)) {
-      console.log("Title moderation failed.");
-      checklist[titleModerationPassed] = false;
-      moderationMetadata["title"] = {
-        "passed": checklist[titleModerationPassed],
-      }
-    }
-  }
-
-  console.log("Moderating Tagline.....");
-  if (!await moderationApiRequest(tagline)) {
-    console.log("Tagline moderation failed.");
-    checklist[taglineModerationPassed] = false;
-    moderationMetadata["tagline"] = {
-      "passed": checklist[taglineModerationPassed],
-    }
-  }
-  else {
-    console.log("Tagline moderation passed.");
-    checklist[taglineModerationPassed] = true;
-    moderationMetadata["tagline"] = {
-      "passed": checklist[taglineModerationPassed],
-    }
-  }
-
-  console.log("Moderating Project Description.....");
-  if (!await moderationApiRequest(description)) {
-    console.log("Project Description moderation failed.");
-    checklist[projectDescriptionModerationPassed] = false;
-    moderationMetadata["description"] = {
-      "passed": checklist[projectDescriptionModerationPassed],
-    }
-  }
-  else {
-    console.log("Project Description moderation passed.");
-    checklist[projectDescriptionModerationPassed] = true;
-    moderationMetadata["description"] = {
-      "passed": checklist[projectDescriptionModerationPassed],
-    }
-  }
-
-
-  console.log("Moderating Project Details & Specifications.....");
-  if (!await moderationApiRequest(details)) {
-    console.log("Project Details & Specifications moderation failed.");
-    checklist[projectDetailsModerationPassed] = false;
-    moderationMetadata["details"] = {
-      "passed": checklist[projectDetailsModerationPassed],
-    }
-  }
-  else {
-    console.log("Project Details & Specifications moderation passed.");
-    checklist[projectDetailsModerationPassed] = true;
-    moderationMetadata["details"] = {
-      "passed": checklist[projectDetailsModerationPassed],
-    }
-  }
-
-  console.log("Moderating Project Stages.....");
-  moderationMetadata["project_stages"] = {};
-  for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
-    if (!await moderationApiRequest(phaseContent)) {
-      checklist[`${phaseKey} moderation passed.`] = false;
-      moderationMetadata["project_stages"][phaseKey] = {
-        "passed": checklist[`${phaseKey} moderation passed.`],
-      }
+  if (title) {
+    console.log("Moderating Title.....");
+    if (pid && oldProposalData && oldProposalData.title !== title) {
+      console.log("Title is different from the previous one. So checking it's moderation.");
+      checkModeration(title, titleModerationPassed, "title");
+    } else if (!pid && !oldProposalData) {
+      console.log("Title is new. So checking it's moderation.");
+      checkModeration(title, titleModerationPassed, "title");
     } else {
-      checklist[`${phaseKey} moderation passed.`] = true;
-      moderationMetadata["project_stages"][phaseKey] = {
-        "passed": checklist[`${phaseKey} moderation passed.`],
-      }
-    }
-  }
-
-  console.log("Moderating Supporting Information");
-  if (!await moderationApiRequest(extraInformation)) {
-    console.log("Supporting information moderation failed.");
-    checklist[supportingInfoModerationPassed] = false;
-    moderationMetadata["extra_information"] = {
-      "passed": checklist[supportingInfoModerationPassed],
+      console.log("Title is same as the previous one. So skipping the check.");
     }
   }
   else {
-    console.log("Supporting information moderation passed.");
-    checklist[supportingInfoModerationPassed] = true;
-    moderationMetadata["extra_information"] = {
-      "passed": checklist[supportingInfoModerationPassed],
+    console.log("Title is not present. So skipping the moderation check.");
+    checklist[titleModerationPassed] = false;
+  }
+
+  if (tagline) {
+    console.log("Moderating Tagline.....");
+    if (pid && oldProposalData && oldProposalData.tagline !== tagline) {
+      console.log("Tagline is different from the previous one. So checking it's moderation.");
+      checkModeration(tagline, taglineModerationPassed, "tagline");
+    }
+    else if (!pid && !oldProposalData) {
+      console.log("Tagline is new. So checking it's moderation.");
+      checkModeration(tagline, taglineModerationPassed, "tagline");
+    }
+    else {
+      console.log("Tagline is same as the previous one. So skipping the check.");
+    }
+  }
+  else {
+    console.log("Tagline is not present. So skipping the moderation check.");
+    delete checklist[taglineModerationPassed];
+  }
+
+
+  if (description) {
+    console.log("Moderating Project Description.....");
+    if (pid && oldProposalData && oldProposalData.description !== description) {
+      console.log("Project Description is different from the previous one. So checking it's moderation.");
+      checkModeration(description, projectDescriptionModerationPassed, "description");
+    }
+    else if (!pid && !oldProposalData) {
+      console.log("Project Description is new. So checking it's moderation.");
+      checkModeration(description, projectDescriptionModerationPassed, "description");
+    }
+    else {
+      console.log("Project Description is same as the previous one. So skipping the check.");
+    }
+  }
+  else {
+    console.log("Project Description is not present. So skipping the moderation check.");
+    checklist[projectDescriptionModerationPassed] = false;
+  }
+
+  if (details) {
+    console.log("Moderating Project Details & Specifications.....");
+    if (pid && oldProposalData && oldProposalData.details !== details) {
+      console.log("Project Details & Specifications are different from the previous one. So checking it's moderation.");
+      checkModeration(details, projectDetailsModerationPassed, "details");
+    }
+    else if (!pid && !oldProposalData) {
+      console.log("Project Details & Specifications are new. So checking it's moderation.");
+      checkModeration(details, projectDetailsModerationPassed, "details");
+    }
+    else {
+      console.log("Project Details & Specifications are same as the previous one. So skipping the check.");
+    }
+  }
+  else {
+    console.log("Project Details & Specifications are not present. So skipping the moderation check.");
+    checklist[projectDetailsModerationPassed] = false;
+  }
+
+  if (projectStages) {
+    console.log("Moderating Project Stages.....");
+    moderationMetadata["project_stages"] = {};
+    for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
+
+      console.log(`Moderating ${phaseKey}.....`);
+      if (pid && oldProposalData && oldProposalData.project_stages[phaseKey] !== phaseContent) {
+        console.log(`${phaseKey} is different from the previous one. So checking it's moderation.`);
+        checkModeration(phaseContent, `${phaseKey} moderation passed.`, phaseKey);
+      }
+      else if (!pid && !oldProposalData) {
+        console.log(`${phaseKey} is new. So checking it's moderation.`);
+        checkModeration(phaseContent, `${phaseKey} moderation passed.`, phaseKey);
+      }
+      else {
+        console.log(`${phaseKey} is same as the previous one. So skipping the check.`);
+      }
+    }
+  }
+  else {
+    console.log("Project Stages are not present. So skipping the moderation check.");
+    checklist[projectStagesRequired] = false;
+    checklist[phase1ModerationPassed] = false;
+    checklist[phase2ModerationPassed] = false;
+  }
+
+  if (extraInformation) {
+    console.log("Moderating Supporting Information");
+    if (pid && oldProposalData && oldProposalData.extra_information !== extraInformation) {
+      console.log("Supporting Information is different from the previous one. So checking it's moderation.");
+      checkModeration(extraInformation, supportingInfoModerationPassed, "extra_information");
+    }
+    else if (!pid && !oldProposalData) {
+      console.log("Supporting Information is new. So checking it's moderation.");
+      checkModeration(extraInformation, supportingInfoModerationPassed, "extra_information");
+    }
+    else {
+      console.log("Supporting Information is same as the previous one. So skipping the check.");
     }
   }
 
