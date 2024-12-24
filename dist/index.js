@@ -42387,31 +42387,54 @@ if (!API_URI) {
   );
 }
 
-var checklist = {
-  "Title is required.": true,
-  "Title must be less than 20 words.": true,
-  "Title must be unique.": true,
-  "Tagline must be less than 160 characters.": true,
-  "Requested funding amount must be an integer.": true,
-  "Organization willing to sponsor is required. Kindly provide a response in Yes or No.": true,
-  "Is it an existing OSS project is required. Kindly provide a response in Yes or No.": true,
-  "Author is required.": true,
-  "Author must be a user on REPOS.": true,
-  "Project description is required. Please provide a description in minimum 50 words.": true,
-  "Project description must be more than 50 words.": true,
-  "Project details are required. Please provide details in minimum 50 words.": true,
-  "Project details must be more than 50 words.": true,
-  "Project stages are required. Phase 1 and Phase 2 are mandatory.": true,
-  "Phase 1 must be more than 20 words.": true,
-  "Phase 2 must be more than 20 words.": true,
-  "Title moderation passed.": true,
-  "Tagline moderation passed.": true,
-  "Project description moderation passed.": true,
-  "Project details & specification moderation passed.": true,
-  "Phase 1 moderation passed.": true,
-  "Phase 2 moderation passed.": true,
-  "Supporting information moderation passed.": true,
-}
+var checklist = {}
+const proposalTitleRequired = "Proposal Title is required.";
+const proposalTitleLength = "Proposal Title must be less than 20 words.";
+const proposalTitleUnique = "Proposal Title must be unique.";
+const proposalTaglineLength = "Proposal Tagline must be less than 160 characters.";
+const requestedFundingAmountInt = "Requested funding amount must be an integer.";
+const organizationWillingToSponsorRequired = "Organization willing to sponsor is required. Kindly provide a response in Yes or No.";
+const existingOssProjectRequired = "Is it an existing OSS project is required. Kindly provide a response in Yes or No.";
+const authorRequired = "Author is required.";
+const authorUserOnRepos = "Author must be a user on REPOS.";
+const projectDescriptionRequired = "Project Description is required. Please provide it in minimum 50 words.";
+const projectDescriptionLength = "Project Description must be more than 50 words.";
+const projectDetailsRequired = "Project Details & Specifications are required. Please provide it in minimum 50 words.";
+const projectDetailsLength = "Project Details & Specifications must be more than 50 words.";
+const projectStagesRequired = "Project Stages are required. Phase 1 and Phase 2 are mandatory.";
+const phase1Length = "Phase 1 must be more than 20 words.";
+const phase2Length = "Phase 2 must be more than 20 words.";
+const titleModerationPassed = "Proposal Title moderation passed.";
+const taglineModerationPassed = "Proposal Tagline moderation passed.";
+const projectDescriptionModerationPassed = "Project Description moderation passed.";
+const projectDetailsModerationPassed = "Project Details & Specifications moderation passed.";
+const phase1ModerationPassed = "Phase 1 moderation passed.";
+const phase2ModerationPassed = "Phase 2 moderation passed.";
+const supportingInfoModerationPassed = "Supporting Information moderation passed.";
+
+checklist[proposalTitleRequired] = true;
+checklist[proposalTitleLength] = true;
+checklist[proposalTitleUnique] = true;
+checklist[proposalTaglineLength] = true;
+checklist[requestedFundingAmountInt] = true;
+checklist[organizationWillingToSponsorRequired] = true;
+checklist[existingOssProjectRequired] = true;
+checklist[authorRequired] = true;
+checklist[authorUserOnRepos] = true;
+checklist[projectDescriptionRequired] = true;
+checklist[projectDescriptionLength] = true;
+checklist[projectDetailsRequired] = true;
+checklist[projectDetailsLength] = true;
+checklist[projectStagesRequired] = true;
+checklist[phase1Length] = true;
+checklist[phase2Length] = true;
+checklist[titleModerationPassed] = true;
+checklist[taglineModerationPassed] = true;
+checklist[projectDescriptionModerationPassed] = true;
+checklist[projectDetailsModerationPassed] = true;
+checklist[phase1ModerationPassed] = true;
+checklist[phase2ModerationPassed] = true;
+checklist[supportingInfoModerationPassed] = true;
 
 let proposalList = {};
 const githubRepositoryUrl = GITHUB_REPOSITORY ? `https://github.com/${GITHUB_REPOSITORY}` : null;
@@ -42463,6 +42486,8 @@ function parseYamlMetadata(content) {
 }
 
 function fetchSections(content) {
+  console.log("Fetching sections from the proposal.....");
+
   content = content.replace(/<!--.*?-->/gs, '');
 
   const projectDescriptionPattern = /## Project Description\s*([\s\S]*?)\s*## Project Details & Specifications/;
@@ -42487,109 +42512,172 @@ function fetchSections(content) {
   };
 }
 
-async function validateProposal(oldProposalData, pid, title, tagline, requestedFundingAmount, organizationWillingToSponsor, existingOssProject, author, description, details, projectStages, extraInformation) {
+async function validateProposal(
+  oldProposalData, pid, title, tagline, requestedFundingAmount,
+  organizationWillingToSponsor, existingOssProject, author,
+  description, details, projectStages, extraInformation) {
   console.log("Performing validations on the proposal.....");
 
   console.log("Validating Title.....");
   if (bypassProcess) {
     if (title) {
-      console.log("Title is present.");
+      console.log("Title is present so validating it.....");
       if (pid && oldProposalData && oldProposalData.title === title) {
-        checklist["Title must be unique."] = true;
+        console.log("Title is same as the previous one. So skipping the check.");
+        checklist[proposalTitleUnique] = true;
       } else {
-        checklist["Title must be unique."] = await checkTitle(title);
+        console.log("Title is not same as the previous one. So checking it's uniqueness.");
+        checklist[proposalTitleUnique] = await checkTitle(title);
         if (title.split(' ').length > 20) {
-          checklist["Title must be less than 20 words."] = false;
+          console.log("Title is more than 20 words.");
+          checklist[proposalTitleLength] = false;
         }
       }
     } else {
       console.log("Title is not present.");
-      checklist["Title is required."] = false;
-      checklist["Title must be unique."] = false;
-      checklist["Title must be less than 20 words."] = false;
-      checklist["Title moderation passed."] = false;
+      checklist[proposalTitleRequired] = false;
+      checklist[proposalTitleLength] = false;
+      checklist[proposalTitleUnique] = false;
+      checklist[titleModerationPassed] = false;
     }
   }
 
+  console.log("Validating Tagline.....");
   if (tagline) {
-    console.log("Validating Tagline.....");
-    console.log("Tagline is present.");
+    console.log("Tagline is present so validating it.....");
     if (tagline.length > 160) {
-      checklist["Tagline must be less than 160 characters."] = false;
+      console.log("Tagline is more than 160 characters.");
+      checklist[proposalTaglineLength] = false;
     }
   } else {
     console.log("Tagline is not present.");
-    delete checklist["Tagline must be less than 160 characters."];
-    delete checklist["Tagline moderation passed."];
+    delete checklist[proposalTaglineLength];
+    delete checklist[taglineModerationPassed];
   }
 
+
+  console.log("Validating Requested Funding Amount.....");
   if (requestedFundingAmount && isNaN(requestedFundingAmount)) {
-    checklist["Requested funding amount must be an integer."] = false;
+    console.log("Requested funding amount is not an integer.");
+    checklist[requestedFundingAmountInt] = false;
   }
 
+  console.log("Validating Organization Willing to Sponsor.....");
   if (!["Yes", "No"].includes(organizationWillingToSponsor)) {
-    checklist["Organization willing to sponsor is required. Kindly provide a response in Yes or No."] = false;
+    console.log("Organization willing to sponsor is required and must be in Yes or No.");
+    checklist[organizationWillingToSponsorRequired] = false;
   }
 
+  console.log("Validating Existing OSS Project.....");
   if (!["Yes", "No"].includes(existingOssProject)) {
-    checklist["Is it an existing OSS project is required. Kindly provide a response in Yes or No."] = false;
+    console.log("Is it an existing OSS project is required and must be in Yes or No.");
+    checklist[existingOssProjectRequired] = false;
   }
 
   console.log("Validating Author.....");
   if (bypassProcess) {
     if (author) {
-      checklist["Author must be a user on REPOS."] = await checkUsername(author);
+      console.log("Author is present so validating it.....");
+      const isUsernameValid = await checkUsername(author);
+      console.log("Author is a user on REPOS");
+      checklist[authorRequired] = isUsernameValid;
     } else {
-      checklist["Author is required."] = false;
-      checklist["Author must be a user on REPOS."] = false;
+      console.log("Author is not present.");
+      checklist[authorRequired] = false;
+      checklist[authorUserOnRepos] = false;
     }
   }
 
+  console.log("Validating Project Description.....");
   if (!description) {
-    checklist["Project description is required. Please provide a description in minimum 50 words."] = false;
-    checklist["Project description must be more than 50 words."] = false;
-    checklist["Project description moderation passed."] = false;
+    console.log("Project Description is not present.");
+    checklist[projectDescriptionRequired] = false;
+    checklist[projectDescriptionLength] = false;
+    checklist[projectDescriptionModerationPassed] = false;
+  }
+  else {
+    console.log("Project Description is present so validating it.....");
+    if (description.split(' ').length < 50) {
+      console.log("Project Description is less than 50 words.");
+      checklist[projectDescriptionLength] = false;
+    }
+    else {
+      console.log("Project Description is more than 50 words.");
+      checklist[projectDescriptionLength] = true;
+    }
   }
 
-  if (description.split(' ').length < 50) {
-    checklist["Project description must be more than 50 words."] = false;
-  }
-
+  console.log("Validating Project Details & Specifications.....");
   if (!details) {
-    checklist["Project details & specification are required. Please provide details in minimum 50 words."] = false;
-    checklist["Project details & specification must be more than 50 words."] = false;
-    checklist["Project details & specification moderation passed."] = false;
+    console.log("Project Details & Specifications are not present.");
+    checklist[projectDetailsRequired] = false;
+    checklist[projectDetailsLength] = false;
+    checklist[projectDetailsModerationPassed] = false;
+  }
+  else {
+    console.log("Project Details & Specifications are present so validating it.....");
+    if (details.split(' ').length < 50) {
+      console.log("Project Details & Specifications are less than 50 words.");
+      checklist[projectDetailsLength] = false;
+    }
+    else {
+      console.log("Project Details & Specifications are more than 50 words.");
+      checklist[projectDetailsLength] = true;
+    }
   }
 
-  if (details.split(' ').length < 50) {
-    checklist["Project details must be more than 50 words."] = false;
-  }
-
+  console.log("Validating Project Stages.....");
   if (!("Phase 1" in projectStages) && !("Phase 2" in projectStages)) {
-    checklist["Project stages are required. Phase 1 and Phase 2 are mandatory."] = false;
-    checklist["Phase 1 must be more than 20 words."] = false;
-    checklist["Phase 2 must be more than 20 words."] = false;
-    checklist["Phase 1 moderation passed."] = false;
-    checklist["Phase 2 moderation passed."] = false;
+    console.log("Project Stages are not present.");
+    checklist[projectStagesRequired] = false;
+    checklist[phase1Length] = false;
+    checklist[phase2Length] = false;
+    checklist[phase1ModerationPassed] = false;
+    checklist[phase2ModerationPassed] = false;
   } else {
+    console.log("Project Stages are present so validating it.....");
+
     if (projectStages["Phase 1"] && projectStages["Phase 1"].split(' ').length < 20) {
-      checklist["Phase 1 must be more than 20 words."] = false;
+      console.log("Phase 1 is less than 20 words.");
+      checklist[phase1Length] = false;
+    }
+    else {
+      console.log("Phase 1 is more than 20 words.");
+      checklist[phase1Length] = true;
     }
 
     if (projectStages["Phase 2"] && projectStages["Phase 2"].split(' ').length < 20) {
-      checklist["Phase 2 must be more than 20 words."] = false;
+      console.log("Phase 2 is less than 20 words.");
+      checklist[phase2Length] = false;
+    }
+    else {
+      console.log("Phase 2 is more than 20 words.");
+      checklist[phase2Length] = true;
+    }
+
+    for (const [phase, phaseDescription] of Object.entries(projectStages)) {
+      if (!["Phase 1", "Phase 2"].includes(phase) && phaseDescription.split(' ').length < 20) {
+        console.log(`${phase} is less than 20 words.`);
+        checklist[`${phase} must be more than 20 words.`] = false;
+      }
+      else {
+        console.log(`${phase} is more than 20 words.`);
+        checklist[`${phase} must be more than 20 words.`] = true;
+      }
     }
   }
 
-  for (const [phase, phaseDescription] of Object.entries(projectStages)) {
-    if (!["Phase 1", "Phase 2"].includes(phase) && phaseDescription.split(' ').length < 20) {
-      checklist[`${phase} must be more than 20 words.`] = false;
-    }
-  }
 
+  console.log("Validating Supporting Information.....");
   if (!extraInformation) {
-    delete checklist["Supporting information moderation passed."];
+    console.log("Supporting information is not present.");
+    delete checklist[supportingInfoModerationPassed];
   }
+  else {
+    console.log("Supporting information is present so validating it.....");
+  }
+
+  console.log("Completed validations on the proposal.");
 }
 
 async function moderationApiRequest(text) {
@@ -42597,61 +42685,79 @@ async function moderationApiRequest(text) {
   return response.status === 200;
 }
 
-async function moderateText(oldProposalData, moderationMetadata, pid, title, tagline, description, details, projectStages, extraInformation) {
+async function moderateText(
+  oldProposalData, moderationMetadata, pid, title,
+  tagline, description, details, projectStages, extraInformation
+) {
+  console.log("Performing moderation checks on the proposal.....");
+
+  console.log("Moderating Title.....");
   if (pid && oldProposalData && oldProposalData.title !== title) {
-    checklist["Title moderation passed."] = await moderationApiRequest(title);
+    console.log("Title is different from the previous one. So checking it's moderation.");
+    checklist[titleModerationPassed] = await moderationApiRequest(title);
     moderationMetadata["title"] = {
-      "passed": checklist["Title moderation passed."],
+      "passed": checklist[titleModerationPassed],
     }
   } else {
     if (!await moderationApiRequest(title)) {
-      checklist["Title moderation passed."] = false;
+      console.log("Title moderation failed.");
+      checklist[titleModerationPassed] = false;
       moderationMetadata["title"] = {
-        "passed": checklist["Title moderation passed."],
+        "passed": checklist[titleModerationPassed],
       }
     }
   }
 
+  console.log("Moderating Tagline.....");
   if (!await moderationApiRequest(tagline)) {
-    checklist["Tagline moderation passed."] = false;
+    console.log("Tagline moderation failed.");
+    checklist[taglineModerationPassed] = false;
     moderationMetadata["tagline"] = {
-      "passed": checklist["Tagline moderation passed."],
+      "passed": checklist[taglineModerationPassed],
     }
   }
   else {
-    checklist["Tagline moderation passed."] = true;
+    console.log("Tagline moderation passed.");
+    checklist[taglineModerationPassed] = true;
     moderationMetadata["tagline"] = {
-      "passed": checklist["Tagline moderation passed."],
+      "passed": checklist[taglineModerationPassed],
     }
   }
 
+  console.log("Moderating Project Description.....");
   if (!await moderationApiRequest(description)) {
-    checklist["Project description moderation passed."] = false;
+    console.log("Project Description moderation failed.");
+    checklist[projectDescriptionModerationPassed] = false;
     moderationMetadata["description"] = {
-      "passed": checklist["Project description moderation passed."],
+      "passed": checklist[projectDescriptionModerationPassed],
     }
   }
   else {
-    checklist["Project description moderation passed."] = true;
+    console.log("Project Description moderation passed.");
+    checklist[projectDescriptionModerationPassed] = true;
     moderationMetadata["description"] = {
-      "passed": checklist["Project description moderation passed."],
+      "passed": checklist[projectDescriptionModerationPassed],
     }
   }
 
 
+  console.log("Moderating Project Details & Specifications.....");
   if (!await moderationApiRequest(details)) {
-    checklist["Project details & specification moderation passed."] = false;
+    console.log("Project Details & Specifications moderation failed.");
+    checklist[projectDetailsModerationPassed] = false;
     moderationMetadata["details"] = {
-      "passed": checklist["Project details & specification moderation passed."],
+      "passed": checklist[projectDetailsModerationPassed],
     }
   }
   else {
-    checklist["Project details & specification moderation passed."] = true;
+    console.log("Project Details & Specifications moderation passed.");
+    checklist[projectDetailsModerationPassed] = true;
     moderationMetadata["details"] = {
-      "passed": checklist["Project details & specification moderation passed."],
+      "passed": checklist[projectDetailsModerationPassed],
     }
   }
 
+  console.log("Moderating Project Stages.....");
   moderationMetadata["project_stages"] = {};
   for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
     if (!await moderationApiRequest(phaseContent)) {
@@ -42659,27 +42765,31 @@ async function moderateText(oldProposalData, moderationMetadata, pid, title, tag
       moderationMetadata["project_stages"][phaseKey] = {
         "passed": checklist[`${phaseKey} moderation passed.`],
       }
-
     } else {
       checklist[`${phaseKey} moderation passed.`] = true;
       moderationMetadata["project_stages"][phaseKey] = {
         "passed": checklist[`${phaseKey} moderation passed.`],
       }
     }
+  }
 
-    if (!await moderationApiRequest(extraInformation)) {
-      checklist["Supporting information moderation passed."] = false;
-      moderationMetadata["extra_information"] = {
-        "passed": checklist["Supporting information moderation passed."],
-      }
-    }
-    else {
-      checklist["Supporting information moderation passed."] = true;
-      moderationMetadata["extra_information"] = {
-        "passed": checklist["Supporting information moderation passed."],
-      }
+  console.log("Moderating Supporting Information");
+  if (!await moderationApiRequest(extraInformation)) {
+    console.log("Supporting information moderation failed.");
+    checklist[supportingInfoModerationPassed] = false;
+    moderationMetadata["extra_information"] = {
+      "passed": checklist[supportingInfoModerationPassed],
     }
   }
+  else {
+    console.log("Supporting information moderation passed.");
+    checklist[supportingInfoModerationPassed] = true;
+    moderationMetadata["extra_information"] = {
+      "passed": checklist[supportingInfoModerationPassed],
+    }
+  }
+
+  console.log("Completed Moderation on the proposal.");
 }
 
 async function main() {
