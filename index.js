@@ -318,7 +318,7 @@ async function validateProposal(
 
 async function moderationApiRequest(text) {
   const response = await axios.post(`${API_URI}check_moderation/`, { text });
-  return response.status === 200;
+  return response;
 }
 
 async function checkModeration(text, checklistKey, metadataKey, phaseKey = null) {
