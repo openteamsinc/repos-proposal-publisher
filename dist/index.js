@@ -42695,7 +42695,7 @@ async function checkModeration(text, checklistKey, metadataKey, phaseKey = null)
     }
 
     if (phaseKey) {
-      moderationMetadata["project_stages"][phaseKey] = {
+      moderationMetadata[metadataKey][phaseKey] = {
         "passed": checklist[checklistKey],
       };
     } else {
@@ -42798,11 +42798,11 @@ async function moderateText(
       console.log(`Moderating ${phaseKey}.....`);
       if (pid && oldProposalData && oldProposalData.project_stages[phaseKey] !== phaseContent) {
         console.log(`${phaseKey} is different from the previous one. So checking it's moderation.`);
-        checkModeration(phaseContent, `${phaseKey} moderation passed.`, phaseKey);
+        checkModeration(phaseContent, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
       }
       else if (!pid && !oldProposalData) {
         console.log(`${phaseKey} is new. So checking it's moderation.`);
-        checkModeration(phaseContent, `${phaseKey} moderation passed.`, phaseKey);
+        checkModeration(phaseContent, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
       }
       else {
         console.log(`${phaseKey} is same as the previous one. So skipping the check.`);
