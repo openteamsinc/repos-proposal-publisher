@@ -42444,18 +42444,18 @@ const bypassProcess = GITHUB_REPOSITORY !== "openteamsinc/repos-proposal-publish
 
 async function checkTitle(title) {
   const response = await axios.get(`${API_URI}check_title?title=${title}`);
-  return response.status === 200;
+  return response?.data?.unique;
 }
 
 async function checkUsername(username) {
   const response = await axios.get(`${API_URI}check_username?username=${username.replace(/^@/, '')}`);
-  return response.status === 200;
+  return response?.data?.exists;
 }
 
 async function checkProposalOnRepos(pid) {
   const response = await axios.get(`${API_URI}check_proposal?pid=${pid}`);
   if (response.status === 200) {
-    return response.data.proposal[0];
+    return response?.data;
   }
   return null;
 }
@@ -42527,7 +42527,9 @@ async function validateProposal(
         checklist[proposalTitleUnique] = true;
       } else {
         console.log("Title is not same as the previous one. So checking it's uniqueness.");
-        checklist[proposalTitleUnique] = await checkTitle(title);
+        const response = await checkTitle(title);
+        console.log(`Title is ${response ? "unique" : "not unique"}.`);
+        checklist[proposalTitleUnique] = response;
         if (title.split(' ').length > 20) {
           console.log("Title is more than 20 words.");
           checklist[proposalTitleLength] = false;
@@ -42579,7 +42581,7 @@ async function validateProposal(
     if (author) {
       console.log("Author is present so validating it.....");
       const isUsernameValid = await checkUsername(author);
-      console.log("Author is a user on REPOS");
+      console.log(`Author is ${isUsernameValid ? "valid" : "invalid"}.`);
       checklist[authorRequired] = isUsernameValid;
     } else {
       console.log("Author is not present.");
@@ -42682,32 +42684,27 @@ async function validateProposal(
 
 async function moderationApiRequest(text) {
   const response = await axios.post(`${API_URI}check_moderation/`, { text });
-  return response;
+  return response?.data?.accepted;
 }
 
 async function checkModeration(text, moderationMetadata, checklistKey, metadataKey, phaseKey = null) {
   try {
     const response = await moderationApiRequest(text);
-    if (response.status === 406) {
-      console.log(`Moderation check failed for ${phaseKey ? phaseKey : metadataKey}:`, response.data.message);
-      checklist[checklistKey] = false;
-    } else {
-      console.log(`Moderation check passed for ${phaseKey ? phaseKey : metadataKey}.`);
-      checklist[checklistKey] = true;
-    }
-
-    if (phaseKey) {
-      moderationMetadata[metadataKey][phaseKey] = {
-        "passed": checklist[checklistKey],
-      };
-    } else {
-      moderationMetadata[metadataKey] = {
-        "passed": checklist[checklistKey],
-      };
-    }
+    console.log(`Moderation check ${response ? "passed" : "failed"} for ${phaseKey ? phaseKey : metadataKey}.`);
+    checklist[checklistKey] = response;
   } catch (error) {
-    console.error(`Error during moderation check for ${metadataKey}:`, error.message);
+    console.error(`Error during moderation check for ${metadataKey}:`, error.response.data.message);
     checklist[checklistKey] = false;
+  }
+
+  if (phaseKey) {
+    moderationMetadata[metadataKey][phaseKey] = {
+      "passed": checklist[checklistKey],
+    };
+  } else {
+    moderationMetadata[metadataKey] = {
+      "passed": checklist[checklistKey],
+    };
   }
 }
 
@@ -42719,7 +42716,7 @@ async function moderateText(
 
   if (title) {
     console.log("Moderating Title.....");
-    if (pid && oldProposalData && oldProposalData.title !== title) {
+    if (pid && oldProposalData && (oldProposalData.title !== title || oldProposalData.moderation_metadata.title.passed === false)) {
       console.log("Title is different from the previous one. So checking it's moderation.");
       await checkModeration(title, moderationMetadata, titleModerationPassed, "title");
     } else if (!pid && !oldProposalData) {
@@ -42736,7 +42733,7 @@ async function moderateText(
 
   if (tagline) {
     console.log("Moderating Tagline.....");
-    if (pid && oldProposalData && oldProposalData.tagline !== tagline) {
+    if (pid && oldProposalData && (oldProposalData.tagline !== tagline || oldProposalData.moderation_metadata.tagline.passed === false)) {
       console.log("Tagline is different from the previous one. So checking it's moderation.");
       await checkModeration(tagline, moderationMetadata, taglineModerationPassed, "tagline");
     }
@@ -42753,10 +42750,9 @@ async function moderateText(
     delete checklist[taglineModerationPassed];
   }
 
-
   if (description) {
     console.log("Moderating Project Description.....");
-    if (pid && oldProposalData && oldProposalData.description !== description) {
+    if (pid && oldProposalData && (oldProposalData.description !== description || oldProposalData.moderation_metadata.description.passed === false)) {
       console.log("Project Description is different from the previous one. So checking it's moderation.");
       await checkModeration(description, moderationMetadata, projectDescriptionModerationPassed, "description");
     }
@@ -42775,7 +42771,7 @@ async function moderateText(
 
   if (details) {
     console.log("Moderating Project Details & Specifications.....");
-    if (pid && oldProposalData && oldProposalData.details !== details) {
+    if (pid && oldProposalData && (oldProposalData.details !== details || oldProposalData.moderation_metadata.details.passed === false)) {
       console.log("Project Details & Specifications are different from the previous one. So checking it's moderation.");
       await checkModeration(details, moderationMetadata, projectDetailsModerationPassed, "details");
     }
@@ -42794,11 +42790,10 @@ async function moderateText(
 
   if (projectStages) {
     console.log("Moderating Project Stages.....");
-    moderationMetadata["project_stages"] = {};
     for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
 
       console.log(`Moderating ${phaseKey}.....`);
-      if (pid && oldProposalData && oldProposalData.project_stages[phaseKey] !== phaseContent) {
+      if (pid && oldProposalData && (oldProposalData.project_stages[phaseKey] !== phaseContent || oldProposalData.moderation_metadata.project_stages[phaseKey].passed === false)) {
         console.log(`${phaseKey} is different from the previous one. So checking it's moderation.`);
         await checkModeration(phaseContent, moderationMetadata, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
       }
@@ -42820,7 +42815,7 @@ async function moderateText(
 
   if (extraInformation) {
     console.log("Moderating Supporting Information");
-    if (pid && oldProposalData && oldProposalData.extra_information !== extraInformation) {
+    if (pid && oldProposalData && (oldProposalData.extra_information !== extraInformation || oldProposalData.moderation_metadata.extra_information.passed === false)) {
       console.log("Supporting Information is different from the previous one. So checking it's moderation.");
       await checkModeration(extraInformation, moderationMetadata, supportingInfoModerationPassed, "extra_information");
     }
@@ -42985,10 +42980,16 @@ async function main() {
       checklist,
       path: proposalPath,
     };
+
+    if (oldProposalData) {
+      proposalList[path.basename(proposalPath)]["oldProposalData"] = oldProposalData;
+    };
+
   }
 
   for (const [filename, proposalData] of Object.entries(proposalList)) {
-    if (!Object.values(proposalData.checklist).every(Boolean)) {
+
+    if (!Object.values(proposalData.checklist).every(Boolean) && proposalData.payload["status"] !== "Published") {
       console.log(`Proposal for ${filename} has some to failed checks. So it is currently set as ${proposalData.payload["status"]} status on REPOS. Kindly fix the issues.`);
     }
 
