@@ -342,7 +342,7 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
       };
     }
   } catch (error) {
-    console.error(`Error during moderation check for ${metadataKey}:`, error);
+    console.error(`Error during moderation check for ${metadataKey}:`, error.message);
     checklist[checklistKey] = false;
   }
 }
