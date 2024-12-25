@@ -321,7 +321,7 @@ async function moderationApiRequest(text) {
   return response;
 }
 
-async function checkModeration(text, checklistKey, metadataKey, phaseKey = null) {
+async function checkModeration(text, moderationMetadata, checklistKey, metadataKey, phaseKey = null) {
   try {
     const response = await moderationApiRequest(text);
     if (response.status === 406) {
@@ -355,10 +355,10 @@ async function moderateText(
     console.log("Moderating Title.....");
     if (pid && oldProposalData && oldProposalData.title !== title) {
       console.log("Title is different from the previous one. So checking it's moderation.");
-      checkModeration(title, titleModerationPassed, "title");
+      checkModeration(title, moderationMetadata, titleModerationPassed, "title");
     } else if (!pid && !oldProposalData) {
       console.log("Title is new. So checking it's moderation.");
-      checkModeration(title, titleModerationPassed, "title");
+      checkModeration(title, moderationMetadata, titleModerationPassed, "title");
     } else {
       console.log("Title is same as the previous one. So skipping the check.");
     }
@@ -372,11 +372,11 @@ async function moderateText(
     console.log("Moderating Tagline.....");
     if (pid && oldProposalData && oldProposalData.tagline !== tagline) {
       console.log("Tagline is different from the previous one. So checking it's moderation.");
-      checkModeration(tagline, taglineModerationPassed, "tagline");
+      checkModeration(tagline, moderationMetadata, taglineModerationPassed, "tagline");
     }
     else if (!pid && !oldProposalData) {
       console.log("Tagline is new. So checking it's moderation.");
-      checkModeration(tagline, taglineModerationPassed, "tagline");
+      checkModeration(tagline, moderationMetadata, taglineModerationPassed, "tagline");
     }
     else {
       console.log("Tagline is same as the previous one. So skipping the check.");
@@ -392,11 +392,11 @@ async function moderateText(
     console.log("Moderating Project Description.....");
     if (pid && oldProposalData && oldProposalData.description !== description) {
       console.log("Project Description is different from the previous one. So checking it's moderation.");
-      checkModeration(description, projectDescriptionModerationPassed, "description");
+      checkModeration(description, moderationMetadata, projectDescriptionModerationPassed, "description");
     }
     else if (!pid && !oldProposalData) {
       console.log("Project Description is new. So checking it's moderation.");
-      checkModeration(description, projectDescriptionModerationPassed, "description");
+      checkModeration(description, moderationMetadata, projectDescriptionModerationPassed, "description");
     }
     else {
       console.log("Project Description is same as the previous one. So skipping the check.");
@@ -411,11 +411,11 @@ async function moderateText(
     console.log("Moderating Project Details & Specifications.....");
     if (pid && oldProposalData && oldProposalData.details !== details) {
       console.log("Project Details & Specifications are different from the previous one. So checking it's moderation.");
-      checkModeration(details, projectDetailsModerationPassed, "details");
+      checkModeration(details, moderationMetadata, projectDetailsModerationPassed, "details");
     }
     else if (!pid && !oldProposalData) {
       console.log("Project Details & Specifications are new. So checking it's moderation.");
-      checkModeration(details, projectDetailsModerationPassed, "details");
+      checkModeration(details, moderationMetadata, projectDetailsModerationPassed, "details");
     }
     else {
       console.log("Project Details & Specifications are same as the previous one. So skipping the check.");
@@ -434,11 +434,11 @@ async function moderateText(
       console.log(`Moderating ${phaseKey}.....`);
       if (pid && oldProposalData && oldProposalData.project_stages[phaseKey] !== phaseContent) {
         console.log(`${phaseKey} is different from the previous one. So checking it's moderation.`);
-        checkModeration(phaseContent, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
+        checkModeration(phaseContent, moderationMetadata, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
       }
       else if (!pid && !oldProposalData) {
         console.log(`${phaseKey} is new. So checking it's moderation.`);
-        checkModeration(phaseContent, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
+        checkModeration(phaseContent, moderationMetadata, `${phaseKey} moderation passed.`, "project_stages", phaseKey);
       }
       else {
         console.log(`${phaseKey} is same as the previous one. So skipping the check.`);
@@ -456,11 +456,11 @@ async function moderateText(
     console.log("Moderating Supporting Information");
     if (pid && oldProposalData && oldProposalData.extra_information !== extraInformation) {
       console.log("Supporting Information is different from the previous one. So checking it's moderation.");
-      checkModeration(extraInformation, supportingInfoModerationPassed, "extra_information");
+      checkModeration(extraInformation, moderationMetadata, supportingInfoModerationPassed, "extra_information");
     }
     else if (!pid && !oldProposalData) {
       console.log("Supporting Information is new. So checking it's moderation.");
-      checkModeration(extraInformation, supportingInfoModerationPassed, "extra_information");
+      checkModeration(extraInformation, moderationMetadata, supportingInfoModerationPassed, "extra_information");
     }
     else {
       console.log("Supporting Information is same as the previous one. So skipping the check.");
