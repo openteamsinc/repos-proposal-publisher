@@ -322,19 +322,26 @@ async function moderationApiRequest(text) {
 }
 
 async function checkModeration(text, checklistKey, metadataKey, phaseKey = null) {
-  const response = await moderationApiRequest(text);
-  if (response.status === 406) checklist[checklistKey] = false;
-  else checklist[checklistKey] = true;
+  try {
+    const response = await moderationApiRequest(text);
+    if (response.status === 406) {
+      checklist[checklistKey] = false;
+    } else {
+      checklist[checklistKey] = true;
+    }
 
-  if (phaseKey) {
-    moderationMetadata["project_stages"][phaseKey] = {
-      "passed": checklist[checklistKey],
-    };
-  }
-  else {
-    moderationMetadata[metadataKey] = {
-      "passed": checklist[checklistKey],
-    };
+    if (phaseKey) {
+      moderationMetadata["project_stages"][phaseKey] = {
+        "passed": checklist[checklistKey],
+      };
+    } else {
+      moderationMetadata[metadataKey] = {
+        "passed": checklist[checklistKey],
+      };
+    }
+  } catch (error) {
+    console.error(`Error during moderation check for ${metadataKey}:`, error);
+    checklist[checklistKey] = false;
   }
 }
 
