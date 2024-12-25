@@ -42689,8 +42689,10 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
   try {
     const response = await moderationApiRequest(text);
     if (response.status === 406) {
+      console.log(`Moderation check failed for ${metadataKey}:`, response.data.message);
       checklist[checklistKey] = false;
     } else {
+      console.log(`Moderation check passed for ${metadataKey}.`);
       checklist[checklistKey] = true;
     }
 
