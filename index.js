@@ -625,7 +625,7 @@ async function main() {
 
   for (const [filename, proposalData] of Object.entries(proposalList)) {
     if (!Object.values(proposalData.checklist).every(Boolean)) {
-      console.log(`Proposal for ${filename} has some to failed checks. So it is currently set as ${payload["status"]} status on REPOS. Kindly fix the issues.`);
+      console.log(`Proposal for ${filename} has some to failed checks. So it is currently set as ${proposalData.payload["status"]} status on REPOS. Kindly fix the issues.`);
     }
 
     console.log(`Submitting proposal for ${filename}`);
