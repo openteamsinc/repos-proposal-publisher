@@ -42697,16 +42697,11 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
     checklist[checklistKey] = false;
   }
 
-  console.log("Updating moderation metadata.....");
-
   if (phaseKey) {
-    console.log("Updating moderation metadata for project stages.....");
-    console.log(moderationMetadata["project_stages"]);
-    moderationMetadata["project_stages"][String(phaseKey)] = {
+    moderationMetadata[metadataKey][phaseKey] = {
       "passed": checklist[checklistKey],
     };
   } else {
-    console.log(`Updating moderation metadata for ${metadataKey}.....`);
     moderationMetadata[metadataKey] = {
       "passed": checklist[checklistKey],
     };
@@ -42793,14 +42788,8 @@ async function moderateText(
     checklist[projectDetailsModerationPassed] = false;
   }
 
-  console.log(moderationMetadata["project_stages"]);
   if (projectStages) {
     console.log("Moderating Project Stages.....");
-    if (moderationMetadata["project_stages"] === undefined) {
-      console.log("Initializing project stages moderation metadata.....");
-      moderationMetadata["project_stages"] = {};
-    }
-    console.log(moderationMetadata["project_stages"]);
     for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
 
       console.log(`Moderating ${phaseKey}.....`);
