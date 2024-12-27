@@ -426,6 +426,9 @@ async function moderateText(
 
   if (projectStages) {
     console.log("Moderating Project Stages.....");
+    if (!moderationMetadata["project_stages"]) {
+      moderationMetadata["project_stages"] = {};
+    }
     for (const [phaseKey, phaseContent] of Object.entries(projectStages)) {
 
       console.log(`Moderating ${phaseKey}.....`);
