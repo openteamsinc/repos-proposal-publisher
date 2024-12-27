@@ -42701,9 +42701,6 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
 
   if (phaseKey) {
     console.log("Updating moderation metadata for project stages.....");
-    if (!moderationMetadata["project_stages"]) {
-      moderationMetadata["project_stages"] = {};
-    }
     console.log(moderationMetadata["project_stages"]);
     moderationMetadata["project_stages"][String(phaseKey)] = {
       "passed": checklist[checklistKey],
@@ -42797,8 +42794,9 @@ async function moderateText(
   }
 
   if (projectStages) {
-    console.log("Moderating Project Stages.....");
+    console.log("Moderating Project Stages.....", moderationMetadata["project_stages"]);
     if (!moderationMetadata["project_stages"]) {
+      console.log("Initializing project stages moderation metadata.....");
       moderationMetadata["project_stages"] = {};
     }
     console.log(moderationMetadata["project_stages"]);
