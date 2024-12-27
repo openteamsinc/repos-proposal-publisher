@@ -42790,7 +42790,6 @@ async function moderateText(
 
   if (projectStages) {
     if (!moderationMetadata["project_stages"]) {
-      console.log("moderationMetadata[project_stages] is not present. So creating it.");
       moderationMetadata["project_stages"] = {};
     }
     console.log("Moderating Project Stages.....");
