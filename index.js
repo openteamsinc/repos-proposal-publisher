@@ -333,14 +333,19 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
     checklist[checklistKey] = false;
   }
 
+  console.log("Updating moderation metadata.....");
+
   if (phaseKey) {
+    console.log("Updating moderation metadata for project stages.....");
     if (!moderationMetadata["project_stages"]) {
       moderationMetadata["project_stages"] = {};
     }
-    moderationMetadata["project_stages"][phaseKey] = {
+    console.log(moderationMetadata["project_stages"]);
+    moderationMetadata["project_stages"][String(phaseKey)] = {
       "passed": checklist[checklistKey],
     };
   } else {
+    console.log(`Updating moderation metadata for ${metadataKey}.....`);
     moderationMetadata[metadataKey] = {
       "passed": checklist[checklistKey],
     };
