@@ -42698,6 +42698,9 @@ async function checkModeration(text, moderationMetadata, checklistKey, metadataK
   }
 
   if (phaseKey) {
+    if (!moderationMetadata["project_stages"]) {
+      moderationMetadata["project_stages"] = {};
+    }
     moderationMetadata["project_stages"][phaseKey] = {
       "passed": checklist[checklistKey],
     };
