@@ -429,9 +429,10 @@ async function moderateText(
     checklist[projectDetailsModerationPassed] = false;
   }
 
+  console.log(moderationMetadata["project_stages"]);
   if (projectStages) {
-    console.log("Moderating Project Stages.....", moderationMetadata["project_stages"]);
-    if (!moderationMetadata["project_stages"]) {
+    console.log("Moderating Project Stages.....");
+    if (moderationMetadata["project_stages"] === undefined) {
       console.log("Initializing project stages moderation metadata.....");
       moderationMetadata["project_stages"] = {};
     }
