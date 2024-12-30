@@ -1,6 +1,8 @@
 # repos-proposal-publisher
 
-This repository is for creation an action for publishing a proposal to REPOS website.
+This repository is for publishing proposals on REPOS website through GitHub Actions.
+
+User can create a proposal markdown file in `proposals` folder with the required fields and push the changes to the repository. The action will run automatically and if all the required fields are filled correctly, and passed all checks of validation and moderation, the proposal will be `Published` to the REPOS website. You can check the proposal on Home page of REPOS website and even on your profile page.
 
 ## Usage
 
@@ -118,4 +120,23 @@ jobs:
             uses: openteamsinc/repos-proposal-publisher@dev
             with:
                 token: ${{ secrets.GH_TOKEN }}
-```bash
+```
+
+After creating the workflow file, you can push the changes to the repository. 
+
+- The action will run automatically and if all the required fields are filled correctly, and passed all checks of validation and moderation, the proposal will be `Published` to the [REPOS](https://repos.openteams.com/). You can check the proposal on Home page of [REPOS](https://repos.openteams.com/) and even on your profile page.
+
+- If there are any issues with the proposal, the action will create proposal as a `Draft` on [REPOS](https://repos.openteams.com/) and you can make the necessary changes on GitHub and push the changes again to publish the proposal. You can check `Draft` proposals on your profile page on [REPOS](https://repos.openteams.com/).
+
+- If there is any moderation failure even after making the necessary changes twice, then the proposal will be updated and will change the status to `Under Review` on [REPOS](https://repos.openteams.com/). You can check the `Under Review` proposals on your profile page on [REPOS](https://repos.openteams.com/).
+
+- You can even update or edit your proposal on [REPOS](https://repos.openteams.com/) if your proposal is in `Draft` or `Under Review` status. 
+
+- Any changes made on proposal on [REPOS](https://repos.openteams.com/) will not be reflected on GitHub. You need to make the changes on GitHub and push the changes again to update the proposal markdown file and match the changes on [REPOS](https://repos.openteams.com/).
+
+# Links 
+
+- [REPOS](https://repos.openteams.com/)
+- [REPOS Submission Guidelines](https://repos.openteams.com/proposals/submission-guidelines)
+- [REPOS FAQ](https://repos.openteams.com/proposals/faq)
+
