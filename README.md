@@ -14,9 +14,9 @@ For publishing a proposal to REPOS website, you need to create a proposal markdo
 - Author: Must be a valid GitHub username, and should have an account on REPOS website.
 - Whether the organization is willing to sponsor the project: Yes or No.
 - Whether this is an existing OSS project: Yes or No.
-- Project Description: Cannot be empty, must meet Moderation Standards, and must be of minimum 50 words.
-- Project Details & Specifications: Cannot be empty, must meet Moderation Standards, and must be of minimum 50 words.
-- Project Stages: Cannot be empty. Phase 1 and Phase 2 are required. Each phase must meet Moderation Standards and must be of minimum 20 words. You can add more phases if needed.
+- Project Description: Cannot be empty, must meet Moderation Standards.
+- Project Details & Specifications: Can be empty, must meet Moderation Standards.
+- Project Stages: Can be empty. Each phase must meet Moderation Standards. You can add more phases if needed.
 - Supporting Information: Can be empty, must meet Moderation Standards.
 
 
@@ -47,7 +47,6 @@ Is this an existing OSS project?: "Yes"
 <!-- 
     1. Project description cannot be empty.
     2. It must meet the Moderation Standards.
-    3. It must be of minimum 50 words.
 -->
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet nisl tincidunt tincidunt
 
@@ -55,9 +54,8 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet n
 ## Project Details & Specifications
 <!-- Provide detailed specifications of the project -->
 <!-- 
-    1. Project details and specifications cannot be empty.
+    1. Project details and specifications can be empty.
     2. It must meet the Moderation Standards.
-    3. It must be of minimum 50 words.
 -->
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet nisl tincidunt tincidunt
 
@@ -65,10 +63,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac purus sit amet n
 ## Project Stages
 <!-- Describe the project stages, including phases such as Phase 1, Phase 2, etc. -->
 <!-- 
-    1. Project stages cannot be empty. Phase 1 and Phase 2 are required.
+    1. Project stages can be empty.
     2. It must meet the Moderation Standards.
-    3. Each phase must be of minimum 20 words.
-    4. You can add more phases if needed.
+    3. You can add more phases if needed.
 -->
 ### Phase 1
 
