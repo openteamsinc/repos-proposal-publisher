@@ -16,5 +16,8 @@
   },
   "files": [
     "index.js"
-  ]
+  ],
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
+  }
 }
